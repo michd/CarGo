@@ -88,6 +88,11 @@ input, select {
   vertical-align: middle;
 }
 
+input[type=button], input[type=submit], input[type=file], input[type=reset], 
+button {
+  margin: 0;
+}
+
 * {
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;

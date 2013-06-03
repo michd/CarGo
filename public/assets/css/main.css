@@ -21,6 +21,24 @@ header h1 {
   color: #000;
 }
 
-#grid {
-  margin: 20px;
+#grid, #program {
+  margin: 20px 0 0 20px;
+  float: left;
+}
+
+#program menu {
+  display: block;
+  margin-bottom: 20px;
+}
+
+
+
+#program-input {
+  width: 400px;
+  height: 300px;
+}
+
+section h1 {
+  margin-bottom: 20px;
+  font-size: 120%;
 }

@@ -28,11 +28,20 @@
         {type: CREDIT, pos: [13, 3]}
       ]
     },
-    grid;
+    grid,
+    program;
 
   grid = new App.Grid(gameData);
 
   App.eventDispatcher.enableLogging();
+
+  program = new App.Program();
+
+  $('#program').find('form').submit(function (event) {
+    event.preventDefault();
+    program.init($('#program-input').val());
+    program.run();
+  });
 
 
 
