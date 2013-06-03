@@ -91,6 +91,10 @@
       return currentCell.hasCredit();
     };
 
+    this.onFinish = function () {
+      return currentCell.isFinish();
+    }
+
     this.pickUpCredit = function () {
       if (currentCell.takeCredit()) {
         events.trigger('credit-picked-up');
