@@ -1,0 +1,26 @@
+@charset 'UTF-8';
+
+html, body {
+  background: #EEE;
+}
+
+body {
+  font-family: 'Consolas', 'monaco', monospace;
+  font-size: 18px;
+  color: #151515;
+}
+
+header {
+  background-color: #AAA;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 200%;
+  color: #000;
+}
+
+#grid {
+  margin: 20px;
+}
