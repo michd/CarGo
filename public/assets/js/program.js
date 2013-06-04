@@ -74,11 +74,11 @@
 
         // In the form of arrays that have the vital info separated
         // TODO: rewrite this bit to use an array of possible matches, base type of instruction of it, etc
-        simpleMatches           = instruction.match(simple),
-        conditionalMatches      = instruction.match(conditional),
-        loopMatches             = instruction.match(loop),
-        conditionalBlockMatches = instruction.match(conditionalBlock),
-        loopBlockMatches        = instruction.match(loopBlock),
+        simpleMatches,
+        conditionalMatches,
+        loopMatches,
+        conditionalBlockMatches,
+        loopBlockMatches,
 
         // Object to contain the parsed command
         output = {};
@@ -86,6 +86,12 @@
 
       // Trim leading and trailing whitespace
       instruction = instruction.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+
+      simpleMatches           = instruction.match(simple);
+      conditionalMatches      = instruction.match(conditional);
+      loopMatches             = instruction.match(loop);
+      conditionalBlockMatches = instruction.match(conditionalBlock);
+      loopBlockMatches        = instruction.match(loopBlock);
 
       // Select which type of command it is
       if (simpleMatches) { // One liner command
@@ -131,7 +137,9 @@
 
 
     /**
-     * Parses the whole plaintext program into a listing we can work with
+     * Parses the whole plaintext program into a listing we can work with.
+     *
+     * Recursion ahead!
      *
      * Ensures commands that are blocks have their own instructions listings
      * as an array property.
@@ -155,80 +163,56 @@
         // Split program into lines
         programLines = textInput.split(/\n|\r/),
 
-        // Current command being worked on.
-        command = false,
-
-        // Line just parsed
-        // When not in a block, this will be identical to command
-        parsed = false,
-
-        // Program listing so far; every finished command (from up there)
-        // gets pushed onto this array
-        listing = [],
-
-        // If there is a block in progress, parsed commands get pushed here
-        block = [],
-
-        blockInProgress = false,
-
         // Iterator
-        i;
+        i = 0;
 
-      // Parse the instructions line by line
-      for (i = 0; i < programLines.length; i += 1) {
-        // Parse this single line
-        parsed = parseInstruction(programLines[i]);
+      function parseBlock() {
+        var
+          // Begin with an empty list of instructions
+          block = [],
 
-        if (blockInProgress) {
-          // If we are currently working on a block
+          // Store one line of parsed instuction
+          parsed = false,
 
-          if (parsed.control === END) {
-            // If instructions just parsed is a block terminator,
-            // wrap up the block we were working on
+          // Store whether we've reached the end of the block
+          end = false;
 
-            blockInProgress = false;
+        while (!end) {
+          // Parse an instruction and advance the pointer
+          parsed = parseInstruction(programLines[i]);
+          i += 1;
 
-            // Assign our finished block of instructions to the command
-            command.instructions = block;
+          if (!parsed) {
+            // Invalid instruction (unable to parse),
+            // continue to next.
+            // TODO: throw exception and notify user.
+            continue;
+          }
 
-            // Add the finished block command to the main program listing
-            listing.push(command);
+          if (parsed.instructions) {
+            // parsed instuctions starts a new block of instructions
+            // Note the plural.
 
-          } else {
-            // This is not a terminator for the current block
+            // Use recursion to fetch the block of instructions
+            // for the one we just parsed.
+            parsed.instructions = parseBlock();
+          }
 
-            // Add the newly parsed instructions to the list of instructions
-            // for the command in progress's block
+          if (parsed.control !== END) {
+            // If the parsed instruction is not the end instruction,
+            // add it to the list for this block
             block.push(parsed);
           }
 
-        } else {
-          // We are not currently in a block
-
-          // So the parsed instruction is the main command in question
-          command = parsed;
-
-          if (parsed.instructions) { // BLOCK OPENER
-            // If the parsed command has an instructions (note the plural)
-            // property, it means we are opening a block
-
-            // Reserve the block array
-            block = [];
-
-            // Note that we are now in block context
-            blockInProgress = true;
-
-          } else {
-            // This was a normal command that doesn't open a new block
-
-            // Just push it onto the listing
-            listing.push(command);
-          }
+          // Both the END instruction and reaching the last line indicate block
+          // end.
+          end = (parsed.instruction === END || i >= programLines.length);
         }
+
+        return block;
       }
 
-      // Finished building the program listing.
-      return listing;
+      return parseBlock();
     }
 
 
@@ -285,9 +269,6 @@
         for (i = 0; i < command.instructions.length; i += 1) {
           execute(command.instructions[i]);
         }
-
-        // Done with this command after that
-        return;
       }
 
       // Single command, not a block, so figure out what we're meant to do,
