@@ -26,7 +26,7 @@ Conditions
 Syntax
 ------
 
-One command per line. You can use conditionals either as one-liners or as blocks. Nested blocks are not yet supported.
+One command per line. You can use conditionals either as one-liners or as blocks.
 
 Conditional one-line examples:
 
@@ -46,8 +46,7 @@ END
 Loops
 -----
 
-Currently only conditional loops, either as one-liners or as blocks. As mentioned before, nested blocks are not yet supported.
-
+Currently only conditional loops, either as one-liners or as blocks.
 Loop one-line examples:
 
 ```
