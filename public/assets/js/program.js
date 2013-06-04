@@ -128,7 +128,7 @@
 
       } else { // Something that wasn't quite right
       // TODO: This should throw an exception, rather than silent ignorance
-
+        console.log('Failed to parse instruction: [' + instruction + ']');
         return false;
 
       }
@@ -206,7 +206,7 @@
 
           // Both the END instruction and reaching the last line indicate block
           // end.
-          end = (parsed.instruction === END || i >= programLines.length);
+          end = (parsed.control == END || i >= programLines.length);
         }
 
         return block;
