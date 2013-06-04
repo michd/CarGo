@@ -18,15 +18,25 @@
       startPos: [1, 1],
       startDirection: RIGHT,
 
-      goalPos: [1, 13],
+      goalPos: [13, 13],
 
       content: [
         {type: WALL,   rect: [[ 0,  0], [14,  0]]},
         {type: WALL,   rect: [[14,  0], [14, 14]]},
         {type: WALL,   rect: [[ 0,  1], [ 0, 14]]},
         {type: WALL,   rect: [[ 1, 14], [13, 14]]},
-        {type: WALL,   rect: [[ 1,  2], [12, 12]]},
-        {type: CREDIT, pos: [13, 3]}
+        {type: WALL,   rect: [[ 1,  2], [12,  2]]},
+        {type: WALL,   rect: [[ 2,  4], [13,  4]]},
+        {type: WALL,   rect: [[ 1,  6], [12,  6]]},
+        {type: WALL,   rect: [[ 2,  8], [13,  8]]},
+        {type: WALL,   rect: [[ 1, 10], [12, 10]]},
+        {type: WALL,   rect: [[ 2, 12], [13, 12]]},
+        {type: CREDIT, pos: [ 7, 3]},
+        {type: CREDIT, pos: [ 1, 4]},
+        {type: CREDIT, pos: [13, 7]},
+        {type: CREDIT, pos: [ 4, 9]},
+        {type: CREDIT, pos: [10, 11]},
+        {type: CREDIT, pos: [ 7, 13]}
       ]
     },
     grid,
