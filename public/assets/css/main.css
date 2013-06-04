@@ -29,6 +29,11 @@ header h1 {
 #program menu {
   display: block;
   margin-bottom: 20px;
+  list-style-type: none;
+}
+
+#program menu li {
+  display: inline;
 }
 
 

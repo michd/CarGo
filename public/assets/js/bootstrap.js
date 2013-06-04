@@ -11,6 +11,7 @@
     LEFT   = 'l',
     RIGHT  = 'r',
 
+    // Describes the whole setup of the game
     gameData = {
       width: 15,
       height: 15,
@@ -31,16 +32,23 @@
     grid,
     program;
 
+  // Initialize the game grid
   grid = new App.Grid(gameData);
 
+  // Help debugging
   App.eventDispatcher.enableLogging();
 
+  // Set up the program wrapper
   program = new App.Program();
 
-  $('#program').find('form').submit(function (event) {
-    event.preventDefault();
+
+  $('#run-program').click(function (event) {
     program.init($('#program-input').val());
     program.run();
+  })
+
+  $('#reset-grid').click(function (event) {
+    grid.reset();
   });
 
 

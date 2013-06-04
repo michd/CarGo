@@ -78,6 +78,13 @@
 
     };
 
+    this.reset = function () {
+      data = [];
+      $grid.find('.row').remove();
+      this.init(gameData);
+      App.car.place(self.getCell(gameData.startPos), gameData.startDirection);
+    };
+
     App.grid = self;
 
     App.Grid = function () {

@@ -150,6 +150,19 @@
       return this;
     };
 
+    this.place = function(cell, direction) {
+      currentCell
+          .toggleFlag('car', false)
+          .toggleFlag([UP, DOWN, LEFT, RIGHT].join(' '), false);
+
+      cell
+          .toggleFlag('car', true)
+          .toggleFlag(direction, true);
+
+      currentCell = cell;
+      return self;
+    }
+
     App.car = self;
 
     App.Car = function () {

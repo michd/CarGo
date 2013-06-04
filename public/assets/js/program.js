@@ -177,7 +177,7 @@
       // Parse the instructions line by line
       for (i = 0; i < programLines.length; i += 1) {
         // Parse this single line
-        parsed = parseInstruction(programLines[i]));
+        parsed = parseInstruction(programLines[i]);
 
         if (blockInProgress) {
           // If we are currently working on a block
