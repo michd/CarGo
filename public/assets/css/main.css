@@ -46,6 +46,10 @@ header h1 {
   height: 300px;
 }
 
+#reference {
+  max-width: 600px;
+}
+
 section h1 {
   margin-bottom: 20px;
   font-size: 120%;
