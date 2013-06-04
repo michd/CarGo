@@ -25,6 +25,71 @@
       <textarea id="program-input"></textarea>
     </section>
 
+    <section id="reference">
+      <h1>Language reference</h1>
+      <p> Here's a brief overview of the commands and constructs at your disposal.</p>
+
+      <h2>Commands</h2>
+      <ul>
+        <li>
+          <code>DRIVE</code>: Drive one square in the direction you're facing
+        </li>
+        <li>
+          <code>TURN RIGHT</code>: Turns 90 degrees to the right, relative to where you're facing
+        </li>
+        <li>
+          <code>TURN LEFT</code>: Turns 90 degrees to the left, relative to where you're facing
+        </li>
+        <li>
+          <code>PICK UP CREDIT</code>: Pick up a credit you're currently on
+        </li>
+      </ul>
+
+      <h2>Conditions</h2>
+      <ul>
+        <li>
+          <code>WALL AHEAD</code>: True if the square directly ahead of the car (keeping in mind the direction) is a wall or boundary of the grid
+        </li>
+        <li>
+          <code>ON CREDIT</code>: True if currently on a square containing a credit
+        </li>
+        <li>
+          <code>ON FINISH</code>: True if currently standing on the finish field
+        </li>
+      </ul>
+
+      <h2>Syntax</h2>
+
+      <p>One command per line. You can use conditionals either as one-liners or as blocks. Nested blocks are not yet supported.</p>
+
+      <p>Conditional one-line examples:</p>
+
+      <pre><code>IF WALL AHEAD: TURN RIGHT
+UNLESS WALL AHEAD: DRIVE</code></pre>
+
+      <p>Conditional block example:</p>
+
+      <pre><code>IF WALL AHEAD:
+  TURN RIGHT
+  TURN RIGHT
+END</code></pre>
+
+      <h2>Loops</h2>
+      <p>Currently only conditional loops, either as one-liners or as blocks. As mentioned before, nested blocks are not yet supported.</p>
+
+      <p>Loop one-line examples:</p>
+
+      <pre><code>UNTIL WALL AHEAD: DRIVE
+WHILE WALL AHEAD: TURN RIGHT</code></pre>
+
+      <p>Loop block example:</p>
+
+      <pre><code>WHILE ON CREDIT:
+  PICK UP CREDIT
+  DRIVE
+END</code></pre>
+    </section>
+
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="/assets/js/jquery-1.10.0.min.js"><\/script>')</script>

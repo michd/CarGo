@@ -5,9 +5,13 @@ html, body {
 }
 
 body {
-  font-family: 'Consolas', 'monaco', monospace;
-  font-size: 18px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
   color: #151515;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Consolas', 'monaco', monospace;
 }
 
 header {
@@ -21,7 +25,7 @@ header h1 {
   color: #000;
 }
 
-#grid, #program {
+#grid, #program, #reference {
   margin: 20px 0 0 20px;
   float: left;
 }
@@ -37,7 +41,6 @@ header h1 {
 }
 
 
-
 #program-input {
   width: 400px;
   height: 300px;
@@ -47,3 +50,39 @@ section h1 {
   margin-bottom: 20px;
   font-size: 120%;
 }
+
+section h2, section p, section ul, section pre {
+  margin-bottom: 20px;
+}
+
+section p, section li {
+  line-height: 1.4;
+}
+
+section ul {
+  margin-left: 40px;
+}
+
+section li {
+  margin-bottom: 15px;
+}
+
+section code, section pre {
+  background-color: #FFF;
+  border: solid 1px #D0D0D0;
+  border-radius: 4px;
+  padding: 3px;
+  color: #444;
+}
+
+section pre {
+  display: block;
+}
+
+section pre code {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
