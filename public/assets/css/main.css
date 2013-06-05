@@ -40,6 +40,9 @@ header h1 {
   display: inline;
 }
 
+#program menu#speed {
+  display: none;
+}
 
 #program-input {
   width: 400px;

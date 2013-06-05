@@ -1,4 +1,4 @@
-(function (App) {
+(function (App, $, global) {
 
   // Init all the things
   var
@@ -40,27 +40,71 @@
       ]
     },
     grid,
-    program;
+    program,
+    codeChanged = true,
+    speedControl = null,
+    events = App.eventDispatcher;
 
   // Initialize the game grid
   grid = new App.Grid(gameData);
 
   // Help debugging
-  App.eventDispatcher.enableLogging();
+  //App.eventDispatcher.enableLogging();
 
   // Set up the program wrapper
   program = new App.Program();
 
+  // TODO: write proper UI module(s) using event dispatcher,
+  // instead of this hodge-podge
 
   $('#run-program').click(function (event) {
-    program.init($('#program-input').val());
-    program.run();
-  })
+    if (codeChanged) {
+      try {
+        program.init($('#program-input').val());
+        speedControl = program.speed();
+      } catch (e) {
+        //TODO: better error messaging system
+        global.alert(e.message);
+      }
+      codeChanged = false;
+    }
 
-  $('#reset-grid').click(function (event) {
+    program.run();
+  });
+
+  $('#pause-program').click(program.pause);
+
+  $('#reset-program').click(function (event) {
     grid.reset();
+    program.stop();
+  });
+
+  $('#program-input').change(function () {
+    codeChanged = true;
+  });
+
+  $('#speed-faster').click(function () {
+    if (speedControl) {
+      speedControl.faster();
+    }
+  });
+
+  $('#speed-slower').click(function () {
+    if (speedControl) {
+      speedControl.slower();
+    }
+  });
+
+  $('#speed-reset').click(function () {
+    if (speedControl) {
+      speedControl.reset();
+    }
+  });
+
+  events.subscribe('program.queue.initialized', function () {
+    $('#speed').show();
   });
 
 
 
-}(this.CARGO));
+}(this.CARGO, this.jQuery, this));

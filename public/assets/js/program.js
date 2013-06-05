@@ -23,23 +23,43 @@
 
     END            = 'END',
 
+
+    DEFAULT_DELAY  = 250,   //
+    MIN_DELAY      = 1,     //  ms
+    MAX_DELAY      = 10000, //
+
     // Arrays of these for regex creation in parsing
     instructions          = [DRIVE, TURN_LEFT, TURN_RIGHT, PICK_UP_CREDIT, STOP],
     conditions            = [ON_CREDIT, ON_FINISH, WALL_AHEAD],
     conditionalStructures = [IF, UNLESS],
-    loopStructures        = [WHILE, UNTIL];
+    loopStructures        = [WHILE, UNTIL],
+
+    events = App.eventDispatcher;
+
+  App.ProgramException = function (message, instruction) {
+    this.name = "CarGo ProgramException";
+    this.message = message;
+
+    if (instruction !== undefined) {
+      this.instruction = instruction;
+    }
+  };
 
 
   App.Program = function () {
 
     var
       program = [],
-      car = App.car; // The car is what the program is centered on.
+      car = App.car, // The car is what the program is centered on.
+      queue,
+      ProgramException = App.ProgramException;
+
 
     // Ensure instantiation
     if (this.constructor !== App.Program) {
       return new App.Program();
     }
+
 
     /**
      * Parses a single text line of instruction from the program into
@@ -127,11 +147,9 @@
         output.control = END;
 
       } else { // Something that wasn't quite right
-      // TODO: This should throw an exception, rather than silent ignorance
-        console.log('Failed to parse instruction: [' + instruction + ']');
-        return false;
-
+        throw new ProgramException('Failed to parse instruction: "' + instruction + '"', instruction);
       }
+
       return output;
     }
 
@@ -182,13 +200,6 @@
           parsed = parseInstruction(programLines[i]);
           i += 1;
 
-          if (!parsed) {
-            // Invalid instruction (unable to parse),
-            // continue to next.
-            // TODO: throw exception and notify user.
-            continue;
-          }
-
           if (parsed.instructions) {
             // parsed instuctions starts a new block of instructions
             // Note the plural.
@@ -206,7 +217,7 @@
 
           // Both the END instruction and reaching the last line indicate block
           // end.
-          end = (parsed.control == END || i >= programLines.length);
+          end = (parsed.control === END || i >= programLines.length);
         }
 
         return block;
@@ -262,13 +273,8 @@
 
 
       if (command.instructions) {
-        // instruction[S], so we're dealing with a block here.
-
-        // Iterate over this block's instruction list an use recursion to
-        // execute every one of them
-        for (i = 0; i < command.instructions.length; i += 1) {
-          execute(command.instructions[i]);
-        }
+        // Prepend this block's instructions to the execution queue
+        queue.unshift(command.instructions);
       }
 
       // Single command, not a block, so figure out what we're meant to do,
@@ -291,8 +297,217 @@
 
       // If this command is a loop, after executing it, we should start over.
       if (isLoop) {
-        execute(command);
+        queue.push(command);
       }
+    }
+
+
+    /**
+     * Queue manager to aid with building delays into recursive execution
+     *
+     * Lets you push stuff to the end of the queue as well as unshift it to
+     * give priority over previously queued commands.
+     */
+    function Queue(stepDelay) {
+      var
+        commandQueue = [],
+        timeout      = null,
+        paused       = false,
+        self         = this;
+
+
+      // Ensure instantiation
+      if (this.constructor !== Queue) {
+        return new Queue();
+      }
+
+      // Intialize delay between steps
+      stepDelay = stepDelay !== undefined ? stepDelay : DEFAULT_DELAY;
+
+
+      /**
+       * Shorthand to check if the queue has been emptied
+       * @return {Boolean}
+       */
+      function isEmpty() {
+        return commandQueue.length === 0;
+      }
+
+
+      /**
+       * Execute whatever command is at the top of the queue right now
+       *
+       * Clears any more timeouts set, then set the timeout for executing the
+       * next command in the queue.
+       *
+       * Doesn't do anything if the paused flag is set or the queue's empty
+       *
+       */
+      function executeNext() {
+
+        if (paused || isEmpty()) { return; }
+
+        execute(commandQueue.shift());
+        clearTimeout(timeout);
+        timeout = setTimeout(executeNext, stepDelay);
+      }
+
+
+      /**
+       * Prevent executing the next command in the queue for the time being
+       * @return {Queue} self
+       */
+      this.pause = function () {
+        paused = true;
+        clearTimeout(timeout);
+        return self;
+      };
+
+
+      /**
+       * (Re)start executing the queue.
+       *
+       * @return {Queue} self
+       */
+      this.resume = function () {
+        paused = false;
+        setTimeout(executeNext, stepDelay);
+        return self;
+      };
+
+
+      /**
+       * Add command(s) to the end of the execution queue
+       *
+       * If the queue was empty and not paused, resumes execution
+       *
+       * @param  {Object|Array} command parsed command | array of commands
+       * @return {Queue} self
+       */
+      this.push = function (command) {
+        var
+          wasEmpty = isEmpty(),
+          i;
+
+        if (command instanceof Array) {
+          // An array of commands was passed (block)
+
+          for (i = 0; i < command.length; i += 1) {
+            commandQueue.push(command[i]);
+          }
+
+        } else {
+          // A single command was passed
+          commandQueue.push(command);
+        }
+
+        if (wasEmpty && !paused) {
+          self.resume();
+        }
+
+        return self;
+      };
+
+
+      /**
+       * Tnsert command(s) at top of the execution queue
+       *
+       * If the queue was empty and not paused, resume execution
+       *
+       * @param  {Object|Array} command parsed command | array of commands
+       * @return {Queue} self
+       */
+      this.unshift = function (command) {
+        var
+          wasEmpty = isEmpty(),
+          i;
+
+        if (command instanceof Array) {
+          // An array of command was passed (block)
+
+          for (i = command.length - 1; i >= 0; i -= 1) {
+            commandQueue.unshift(command[i]);
+          }
+
+        } else {
+          // A single command was passed
+          commandQueue.unshift(command);
+        }
+
+        if (wasEmpty && !paused) {
+          self.resume();
+        }
+
+        return self;
+      };
+
+      /**
+       * Empties the execution queue
+       * @return {[type]} [description]
+       */
+      this.clear = function () {
+        commandQueue = [];
+        return self;
+      };
+
+
+      this.isEmpty = isEmpty;
+
+
+      /**
+       * Returns an interface for controlling the speed of the queue
+       *
+       * @return {Object}
+       */
+      this.speed = function () {
+
+        return {
+          /**
+           * Halves delay between steps, within limits.
+           *
+           * @return {Bool} false if limit reached and no change made
+           */
+          faster: function () {
+            if (stepDelay > MIN_DELAY) {
+              stepDelay /= 2;
+              return true;
+            }
+            return false;
+          },
+
+          /**
+           * Doubles delay between steps, within limits.
+           *
+           * @return {Bool} false if limit reached and no change made
+           */
+          slower: function () {
+            if (stepDelay < MAX_DELAY) {
+              stepDelay *= 2;
+              return true;
+            }
+            return false;
+          },
+
+
+          /**
+           * Resets delay between steps to default value
+           */
+          reset: function () {
+            stepDelay = DEFAULT_DELAY;
+          },
+
+          /**
+           * Gets the currently set step delay
+           *
+           * @return {Number}
+           */
+          currentStepDelay: function () {
+            return stepDelay;
+          }
+        };
+      };
+
+      events.trigger('program.queue.initialized');
     }
 
 
@@ -301,12 +516,35 @@
      *
      */
     this.run = function () {
-      var i;
-
-      // Iterate over the program array and execute every command found
-      for (i = 0; i < program.length; i += 1) {
-        execute(program[i]);
+      if (!queue.isEmpty()) {
+        queue.resume();
+      } else {
+        queue.clear().push(program);
       }
+    };
+
+
+    this.pause = function () {
+      queue.pause();
+    };
+
+
+    /**
+     * Clear execution queue, thus stopping the program
+     *
+     */
+    this.stop = function () {
+      queue.clear();
+    };
+
+
+    /**
+     * Exposes the queue's speed interface
+     *
+     * @return {Object}
+     */
+    this.speed = function () {
+      return queue.speed();
     };
 
 
@@ -316,6 +554,12 @@
      * @param  {String} programText
      */
     this.init = function (programText) {
+      if (queue === undefined) {
+        queue = new Queue();
+      } else {
+        queue.clear();
+      }
+
       program = parseProgram(programText);
     };
 
