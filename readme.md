@@ -3,9 +3,9 @@ CarGo
 
 Game to learn basic concepts of programming through going through a puzzle course.
 
-Currently runs through the program instantly (no delay between steps).
-
 I'm planning to build an interface so you don't manually have to type commands (using menus).
+
+Quite likely there's a bunch of glitches relating to editing the program and clicking run and whatnot.
 
 
 Commands
