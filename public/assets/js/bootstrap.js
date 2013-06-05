@@ -60,6 +60,7 @@
   $('#run-program').click(function (event) {
     if (codeChanged) {
       try {
+        grid.reset();
         program.init($('#program-input').val());
         speedControl = program.speed();
       } catch (e) {
