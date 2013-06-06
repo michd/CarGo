@@ -1,4 +1,4 @@
-(function (App) {
+(function (App, global) {
 
   "use strict";
 
@@ -52,7 +52,8 @@
       program = [],
       car = App.car, // The car is what the program is centered on.
       queue,
-      ProgramException = App.ProgramException;
+      ProgramException = App.ProgramException,
+      self = this;
 
 
     // Ensure instantiation
@@ -525,7 +526,9 @@
 
 
     this.pause = function () {
-      queue.pause();
+      if (queue) {
+        queue.pause();
+      }
     };
 
 
@@ -534,7 +537,9 @@
      *
      */
     this.stop = function () {
-      queue.clear();
+      if (queue) {
+        queue.clear();
+      }
     };
 
 
@@ -563,6 +568,49 @@
       program = parseProgram(programText);
     };
 
+
+    // Set up event listeners
+    (function () {
+      var codeEdited = true;
+      var unparsedCode = '';
+
+      events.subscribe({
+        // Run button clicked
+        'ui.program.run': function () {
+          if (codeEdited) { // If code has changed, parse the updated program
+            try {
+              self.init(unparsedCode);
+            } catch (e) {
+              global.alert(e.message);
+            }
+          }
+
+          self.run();
+          codeEdited = false;
+        },
+
+        'ui.program.pause': self.pause,
+
+        'ui.program.reset': self.stop,
+
+        // Code editor content changed
+        'ui.code.edited': function (data) {
+          unparsedCode = data;
+          codeEdited = true;
+        }
+      });
+
+    }());
+
+
+    App.program = self;
+
+    // Override constructor
+    App.Program = function () {
+      App.program = self;
+      return self;
+    };
+
   };
 
-}(this.CARGO));
+}(this.CARGO, this));

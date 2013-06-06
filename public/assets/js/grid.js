@@ -1,6 +1,8 @@
-(function (global, App, $) {
+(function (App, $, global) {
 
-  var $grid = $('#grid');
+  var
+    $grid = $('#grid'),
+    events = App.eventDispatcher;
 
   App.Grid = function (gameData) {
 
@@ -81,9 +83,14 @@
     this.reset = function () {
       data = [];
       $grid.find('.row').remove();
-      this.init(gameData);
+      self.init(gameData);
       App.car.place(self.getCell(gameData.startPos), gameData.startDirection);
     };
+
+    // Set up event listeners
+    (function () {
+      events.subscribe('ui.grid.reset', self.reset);
+    }());
 
     App.grid = self;
 
@@ -96,4 +103,4 @@
     this.init(gameData);
   };
 
-}(this, this.CARGO, this.jQuery));
+}(this.CARGO, this.jQuery, this));

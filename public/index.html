@@ -19,14 +19,15 @@
     <section id="program">
       <h1>Program</h1>
       <menu>
-        <li><button id="run-program">Run</button></li>
-        <li><button id="pause-program">Pause</button></li>
-        <li><button id="reset-program">Reset</button></li>
+        <li><button data-event="program.run">Run</button></li>
+        <!-- make this queue.pause instead -->
+        <li><button data-event="program.pause">Pause</button></li>
+        <li><button data-event="program.reset, grid.reset">Reset</button></li>
       </menu>
       <menu id="speed">
-        <li><button id="speed-faster">Faster</button></li>
-        <li><button id="speed-reset">Reset speed</button></li>
-        <li><button id="speed-slower">Slower</button></li>
+        <li><button data-event="queue.speed.faster">Faster</button></li>
+        <li><button data-event="queue.speed.reset">Reset speed</button></li>
+        <li><button data-event="queue.speed.slower">Slower</button></li>
       </menu>
       <textarea id="program-input"></textarea>
     </section>
@@ -105,6 +106,7 @@ END</code></pre>
   <script src="/assets/js/grid.js"></script>
   <script src="/assets/js/car.js"></script>
   <script src="/assets/js/program.js"></script>
+  <script src="/assets/js/ui/buttons.js"></script>
   <script src="/assets/js/bootstrap.js"></script>
 </body>
 

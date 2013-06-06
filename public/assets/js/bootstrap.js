@@ -49,41 +49,17 @@
   grid = new App.Grid(gameData);
 
   // Help debugging
-  //App.eventDispatcher.enableLogging();
+  App.eventDispatcher.enableLogging();
 
   // Set up the program wrapper
   program = new App.Program();
 
-  // TODO: write proper UI module(s) using event dispatcher,
-  // instead of this hodge-podge
-
-  $('#run-program').click(function (event) {
-    if (codeChanged) {
-      try {
-        grid.reset();
-        program.init($('#program-input').val());
-        speedControl = program.speed();
-      } catch (e) {
-        //TODO: better error messaging system
-        global.alert(e.message);
-      }
-      codeChanged = false;
-    }
-
-    program.run();
-  });
-
-  $('#pause-program').click(program.pause);
-
-  $('#reset-program').click(function (event) {
-    grid.reset();
-    program.stop();
-  });
-
   $('#program-input').change(function () {
-    codeChanged = true;
+    events.trigger('ui.code.edited', $(this).val());
   });
 
+  // TODO: separate out the queue manager and make it listen to events,
+  // set up ui events for the speed buttons
   $('#speed-faster').click(function () {
     if (speedControl) {
       speedControl.faster();
@@ -103,9 +79,7 @@
   });
 
   events.subscribe('program.queue.initialized', function () {
-    $('#speed').show();
+    //$('#speed').show();
   });
-
-
 
 }(this.CARGO, this.jQuery, this));
