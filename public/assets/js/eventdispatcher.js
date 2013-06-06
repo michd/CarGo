@@ -40,7 +40,7 @@
    */
   function trigger(eventName, data, context) {
     var
-      subscribers = eventSubscribers[eventName],
+      subscribers = eventSubscribers[eventName] || [],
       i, iMax,
       logThis = (logEvents && logIgnoredEvents.indexOf(eventName) === -1);
 
@@ -50,20 +50,10 @@
     //Set a default value for `this` in the callback
     context = context || App;
 
-    // No subscribers found for this event, don't bother.
-    if (subscribers === undefined) {
-
-      if (logThis) {
-        console.log('[EventDispatcher] No current subscribers for {' + eventName + '}');
-      }
-
-      return;
-    }
-
     // Do some logging
     if (logThis) {
       console.log(
-        '[EventDispatcher] {' +  eventName + '} triggered with data: ',
+        '[Event] {' +  eventName + '} triggered with data: ',
         data,
         ' and sent to {' + subscribers.length + '} subscribers.'
       );
