@@ -25,6 +25,40 @@ header h1 {
   color: #000;
 }
 
+/* Flash notification messages */
+.flashmsg {
+  margin: 20px;
+  padding: 10px 20px;
+  border: solid 1px #404040;
+  background-color: #FFF;
+  color: #404040;
+}
+
+.flashmsg.notice {
+  border-color: #002080;
+  background-color: #CCD9FF;
+  color: #001040;
+}
+
+.flashmsg.success {
+  border-color: #008000;
+  background-color: #CFC;
+  color: #004000;
+}
+
+.flashmsg.warning {
+  border-color: #806000;
+  background-color: #FFF2CC;
+  color: #403000;
+}
+
+.flashmsg.error {
+  border-color: #800b00;
+  background-color: #FFD0CC;
+  color: #400500;
+}
+
+
 #grid, #program, #reference {
   margin: 20px 0 0 20px;
   float: left;
