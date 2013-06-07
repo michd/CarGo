@@ -39,10 +39,10 @@
 
       END            = 'END',
 
-      // Arrays of these for regex creation in parsing
+      // Arrays of code keyword for regex creation in parsing
       instructions          = [DRIVE, TURN_LEFT, TURN_RIGHT, PICK_UP_CREDIT, STOP],
       conditions            = [ON_CREDIT, ON_FINISH, WALL_AHEAD],
-      conditionalStructures = [IF, UNLESS],
+      conditionalStructures = [IF, UNLESS, WHILE, UNTIL],
       loopStructures        = [WHILE, UNTIL],
 
 
@@ -70,82 +70,67 @@
      */
     function parseInstruction(instruction) {
       var
+        // consts for indicating instruction types
+        SIMPLE            = 'simple',
+        CONDITIONAL       = 'conditional',
+        CONDITIONAL_BLOCK = 'conditionalBlock',
+        BLOCK_ENDER       = 'blockEnder',
+
         // Regexes of instruction line types
+        instructionTypes = {
+          simple:           new RegExp('^(' + instructions.join('|') + ')$'),
+          conditional:      new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '): (' + instructions.join('|') + ')$'),
+          conditionalBlock: new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '):$'),
+          blockEnder:       new RegExp('^' + END + '$')
+        },
 
-        // Single simple instruction
-        simple           = new RegExp('^(' + instructions.join('|') + ')$'),
-
-        // Conditional construct + simple instruction
-        conditional      = new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '): (' + instructions.join('|') + ')$'),
-
-        // Conditional loop construct + simple instruction to repeat
-        loop             = new RegExp('^(' + loopStructures.join('|') + ') (' + conditions.join('|') + '): (' + instructions.join('|') + ')$'),
-
-        // Start of a conditional block, later terminated by END
-        conditionalBlock = new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '):$'),
-
-        // Start of a conditional loop block, later terminated by END
-        loopBlock        = new RegExp('^(' + loopStructures.join('|') + ') (' + conditions.join('|') + '):$'),
-
-
-        // Possible matches to any of these formats
-
-        // In the form of arrays that have the vital info separated
-        // TODO: rewrite this bit to use an array of possible matches, base type of instruction of it, etc
-        simpleMatches,
-        conditionalMatches,
-        loopMatches,
-        conditionalBlockMatches,
-        loopBlockMatches,
+        instructionType,
+        matches,
+        i,
 
         // Object to contain the parsed command
         output = {};
 
 
       // Trim leading and trailing whitespace
-      instruction = instruction.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+      instruction = instruction.replace(/^\s\s*/, '').replace(/\s\s*$/, '').toUpperCase();
 
-      simpleMatches           = instruction.match(simple);
-      conditionalMatches      = instruction.match(conditional);
-      loopMatches             = instruction.match(loop);
-      conditionalBlockMatches = instruction.match(conditionalBlock);
-      loopBlockMatches        = instruction.match(loopBlock);
+      // Find matching instruction type
+      for (instructionType in instructionTypes) {
+        if (instructionTypes.hasOwnProperty(instructionType)) {
+          matches = instruction.match(instructionTypes[instructionType]);
 
-      // Select which type of command it is
-      if (simpleMatches) { // One liner command
+          if (matches) { break; }
+        }
+      }
 
-        output.instruction = simpleMatches[1];
+      if (!matches) { // No matches found means we failed to parse
+        throw new ProgramException('Failed to parse instruction: "' + instruction + '"');
+      }
 
-      } else if (conditionalMatches) { // One liner conditional + command
+      // Build output command objected based on what pattern matched
+      switch (instructionType) {
 
-        output.control     = conditionalMatches[1];
-        output.condition   = conditionalMatches[2];
-        output.instruction = conditionalMatches[3];
+      case SIMPLE:
+        output.instruction = matches[1];
+        break;
 
-      } else if (loopMatches) { // One liner condition loop + command
+      case CONDITIONAL: // Intentional fallthrough
+        output.instruction = matches[3];
+        break;
 
-        output.control     = loopMatches[1];
-        output.condition   = loopMatches[2];
-        output.instruction = loopMatches[3];
+      case CONDITIONAL_BLOCK:
+        output.instructions = [];
+        break;
 
-      } else if (conditionalBlockMatches) { // Block conditional, continues in later instructions
-
-        output.control      = conditionalBlockMatches[1];
-        output.condition    = conditionalBlockMatches[2];
-        output.instructions = [];  // To be populated by commands that are part of this block
-
-      } else if (loopBlockMatches) { // Block loop, continues in later instructions
-
-        output.control      = loopBlockMatches[1];
-        output.condition    = loopBlockMatches[2];
-        output.instructions = []; // To be populated by commands that are part of this block
-
-      } else if (instruction === END) { // Block closer
-
+      case BLOCK_ENDER:
         output.control = END;
+        break;
+      }
 
-      } else { // Something that wasn't quite right
-        throw new ProgramException('Failed to parse instruction: "' + instruction + '"', instruction);
+      if ([CONDITIONAL, CONDITIONAL_BLOCK].indexOf(instructionType) > -1) {
+        output.control   = matches[1];
+        output.condition = matches[2];
       }
 
       return output;
@@ -177,7 +162,7 @@
     function parseProgram(textInput) {
       var
         // Split program into lines
-        programLines = textInput.split(/\n|\r/),
+        programLines = textInput.replace(/^\s\s*/, '').replace(/\s\s*$/, '').split(/\n|\r/),
 
         // Iterator
         i = 0;
