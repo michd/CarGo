@@ -19,10 +19,9 @@
     <section id="program">
       <h1>Program</h1>
       <menu>
-        <li><button data-event="program.run">Run</button></li>
-        <!-- make this queue.pause instead -->
-        <li><button data-event="program.pause">Pause</button></li>
-        <li><button data-event="program.reset, grid.reset">Reset</button></li>
+        <li><button data-event="program.run, queue.resume">Run</button></li>
+        <li><button data-event="queue.pause">Pause</button></li>
+        <li><button data-event="grid.reset, queue.clear">Reset</button></li>
       </menu>
       <menu id="speed">
         <li><button data-event="queue.speed.faster">Faster</button></li>
@@ -102,6 +101,7 @@ END</code></pre>
   <script>window.jQuery || document.write('<script src="/assets/js/jquery-1.10.0.min.js"><\/script>')</script>
   <script src="/assets/js/namespace.js"></script>
   <script src="/assets/js/eventdispatcher.js"></script>
+  <script src="/assets/js/queue.js"></script>
   <script src="/assets/js/cell.js"></script>
   <script src="/assets/js/grid.js"></script>
   <script src="/assets/js/car.js"></script>

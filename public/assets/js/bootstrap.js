@@ -58,28 +58,14 @@
     events.trigger('ui.code.edited', $(this).val());
   });
 
-  // TODO: separate out the queue manager and make it listen to events,
-  // set up ui events for the speed buttons
-  $('#speed-faster').click(function () {
-    if (speedControl) {
-      speedControl.faster();
-    }
-  });
+  events.subscribe({
+    'ui.queue.resume': function () {
+      $('#speed').show();
+    },
 
-  $('#speed-slower').click(function () {
-    if (speedControl) {
-      speedControl.slower();
+    'ui.queue.pause': function () {
+      $('#speed').hide();
     }
-  });
-
-  $('#speed-reset').click(function () {
-    if (speedControl) {
-      speedControl.reset();
-    }
-  });
-
-  events.subscribe('program.queue.initialized', function () {
-    //$('#speed').show();
   });
 
 }(this.CARGO, this.jQuery, this));

@@ -9,7 +9,7 @@
         wall:   false,
         finish: false,
         credit: false,
-        direction: null
+        direction: null //deprecated?
       };
 
     if (this.constructor !== App.Cell) {

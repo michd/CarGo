@@ -1,40 +1,8 @@
 (function (App, global) {
-
   "use strict";
 
-  var
-    // Simple instructions
-    DRIVE          = 'DRIVE',
-    TURN_LEFT      = 'TURN LEFT',
-    TURN_RIGHT     = 'TURN RIGHT',
-    PICK_UP_CREDIT = 'PICK UP CREDIT',
-    STOP           = 'STOP',
+  var events = App.eventDispatcher;
 
-    // Conditions
-    ON_CREDIT      = 'ON CREDIT',
-    ON_FINISH      = 'ON FINISH',
-    WALL_AHEAD     = 'WALL AHEAD',
-
-    // Control structures
-    IF             = 'IF',
-    UNLESS         = 'UNLESS',
-    WHILE          = 'WHILE',
-    UNTIL          = 'UNTIL',
-
-    END            = 'END',
-
-
-    DEFAULT_DELAY  = 250,   //
-    MIN_DELAY      = 1,     //  ms
-    MAX_DELAY      = 10000, //
-
-    // Arrays of these for regex creation in parsing
-    instructions          = [DRIVE, TURN_LEFT, TURN_RIGHT, PICK_UP_CREDIT, STOP],
-    conditions            = [ON_CREDIT, ON_FINISH, WALL_AHEAD],
-    conditionalStructures = [IF, UNLESS],
-    loopStructures        = [WHILE, UNTIL],
-
-    events = App.eventDispatcher;
 
   App.ProgramException = function (message, instruction) {
     this.name = "CarGo ProgramException";
@@ -49,11 +17,40 @@
   App.Program = function () {
 
     var
-      program = [],
-      car = App.car, // The car is what the program is centered on.
-      queue,
+      // Constants: program constructs/commands
+
+      // Simple instructions
+      DRIVE          = 'DRIVE',
+      TURN_LEFT      = 'TURN LEFT',
+      TURN_RIGHT     = 'TURN RIGHT',
+      PICK_UP_CREDIT = 'PICK UP CREDIT',
+      STOP           = 'STOP',
+
+      // Conditions
+      ON_CREDIT      = 'ON CREDIT',
+      ON_FINISH      = 'ON FINISH',
+      WALL_AHEAD     = 'WALL AHEAD',
+
+      // Control structures
+      IF             = 'IF',
+      UNLESS         = 'UNLESS',
+      WHILE          = 'WHILE',
+      UNTIL          = 'UNTIL',
+
+      END            = 'END',
+
+      // Arrays of these for regex creation in parsing
+      instructions          = [DRIVE, TURN_LEFT, TURN_RIGHT, PICK_UP_CREDIT, STOP],
+      conditions            = [ON_CREDIT, ON_FINISH, WALL_AHEAD],
+      conditionalStructures = [IF, UNLESS],
+      loopStructures        = [WHILE, UNTIL],
+
+
+      program          = [],
+      car              = App.car, // The car is what the program is centered on.
+      queue            = App.queue,
       ProgramException = App.ProgramException,
-      self = this;
+      self             = this;
 
 
     // Ensure instantiation
@@ -229,6 +226,33 @@
 
 
     /**
+     * Wraps command objects in execute-calling function objects
+     *
+     * Works with arrays of commands too
+     *
+     * @param  {Object|Array} command Single command objector array of them
+     * @param  {Function} Function to wrap the command with
+     * @return {Function|Array} Single function-wrapped command, or array of 'em
+     */
+    function wrapCommand(command, fn) {
+      var
+        isList = command instanceof Array,
+        wrappedCommandList = [],
+        i;
+
+      if (!isList) {
+        return function () { fn(command); };
+      }
+
+      for (i = 0; i < command.length; i += 1) {
+        wrappedCommandList.push(wrapCommand(command[i], fn));
+      }
+
+      return wrappedCommandList;
+    }
+
+
+    /**
      * Execute a given parsed command
      *
      * Employs recursion in case the command has a block of instructions
@@ -275,7 +299,16 @@
 
       if (command.instructions) {
         // Prepend this block's instructions to the execution queue
-        queue.unshift(command.instructions);
+        var block = command.instructions.slice();
+
+        if (isLoop) {
+          block.push(command);
+        }
+        queue.unshift(wrapCommand(block, execute));
+      } else {
+        if (isLoop) {
+          queue.unshift(wrapCommand(command, execute));
+        }
       }
 
       // Single command, not a block, so figure out what we're meant to do,
@@ -295,220 +328,6 @@
         car.pickUpCredit();
         break;
       }
-
-      // If this command is a loop, after executing it, we should start over.
-      if (isLoop) {
-        queue.push(command);
-      }
-    }
-
-
-    /**
-     * Queue manager to aid with building delays into recursive execution
-     *
-     * Lets you push stuff to the end of the queue as well as unshift it to
-     * give priority over previously queued commands.
-     */
-    function Queue(stepDelay) {
-      var
-        commandQueue = [],
-        timeout      = null,
-        paused       = false,
-        self         = this;
-
-
-      // Ensure instantiation
-      if (this.constructor !== Queue) {
-        return new Queue();
-      }
-
-      // Intialize delay between steps
-      stepDelay = stepDelay !== undefined ? stepDelay : DEFAULT_DELAY;
-
-
-      /**
-       * Shorthand to check if the queue has been emptied
-       * @return {Boolean}
-       */
-      function isEmpty() {
-        return commandQueue.length === 0;
-      }
-
-
-      /**
-       * Execute whatever command is at the top of the queue right now
-       *
-       * Clears any more timeouts set, then set the timeout for executing the
-       * next command in the queue.
-       *
-       * Doesn't do anything if the paused flag is set or the queue's empty
-       *
-       */
-      function executeNext() {
-
-        if (paused || isEmpty()) { return; }
-
-        execute(commandQueue.shift());
-        clearTimeout(timeout);
-        timeout = setTimeout(executeNext, stepDelay);
-      }
-
-
-      /**
-       * Prevent executing the next command in the queue for the time being
-       * @return {Queue} self
-       */
-      this.pause = function () {
-        paused = true;
-        clearTimeout(timeout);
-        return self;
-      };
-
-
-      /**
-       * (Re)start executing the queue.
-       *
-       * @return {Queue} self
-       */
-      this.resume = function () {
-        paused = false;
-        setTimeout(executeNext, stepDelay);
-        return self;
-      };
-
-
-      /**
-       * Add command(s) to the end of the execution queue
-       *
-       * If the queue was empty and not paused, resumes execution
-       *
-       * @param  {Object|Array} command parsed command | array of commands
-       * @return {Queue} self
-       */
-      this.push = function (command) {
-        var
-          wasEmpty = isEmpty(),
-          i;
-
-        if (command instanceof Array) {
-          // An array of commands was passed (block)
-
-          for (i = 0; i < command.length; i += 1) {
-            commandQueue.push(command[i]);
-          }
-
-        } else {
-          // A single command was passed
-          commandQueue.push(command);
-        }
-
-        if (wasEmpty && !paused) {
-          self.resume();
-        }
-
-        return self;
-      };
-
-
-      /**
-       * Tnsert command(s) at top of the execution queue
-       *
-       * If the queue was empty and not paused, resume execution
-       *
-       * @param  {Object|Array} command parsed command | array of commands
-       * @return {Queue} self
-       */
-      this.unshift = function (command) {
-        var
-          wasEmpty = isEmpty(),
-          i;
-
-        if (command instanceof Array) {
-          // An array of command was passed (block)
-
-          for (i = command.length - 1; i >= 0; i -= 1) {
-            commandQueue.unshift(command[i]);
-          }
-
-        } else {
-          // A single command was passed
-          commandQueue.unshift(command);
-        }
-
-        if (wasEmpty && !paused) {
-          self.resume();
-        }
-
-        return self;
-      };
-
-      /**
-       * Empties the execution queue
-       * @return {[type]} [description]
-       */
-      this.clear = function () {
-        commandQueue = [];
-        return self;
-      };
-
-
-      this.isEmpty = isEmpty;
-
-
-      /**
-       * Returns an interface for controlling the speed of the queue
-       *
-       * @return {Object}
-       */
-      this.speed = function () {
-
-        return {
-          /**
-           * Halves delay between steps, within limits.
-           *
-           * @return {Bool} false if limit reached and no change made
-           */
-          faster: function () {
-            if (stepDelay > MIN_DELAY) {
-              stepDelay /= 2;
-              return true;
-            }
-            return false;
-          },
-
-          /**
-           * Doubles delay between steps, within limits.
-           *
-           * @return {Bool} false if limit reached and no change made
-           */
-          slower: function () {
-            if (stepDelay < MAX_DELAY) {
-              stepDelay *= 2;
-              return true;
-            }
-            return false;
-          },
-
-
-          /**
-           * Resets delay between steps to default value
-           */
-          reset: function () {
-            stepDelay = DEFAULT_DELAY;
-          },
-
-          /**
-           * Gets the currently set step delay
-           *
-           * @return {Number}
-           */
-          currentStepDelay: function () {
-            return stepDelay;
-          }
-        };
-      };
-
-      events.trigger('program.queue.initialized');
     }
 
 
@@ -517,28 +336,8 @@
      *
      */
     this.run = function () {
-      if (!queue.isEmpty()) {
-        queue.resume();
-      } else {
-        queue.clear().push(program);
-      }
-    };
-
-
-    this.pause = function () {
-      if (queue) {
-        queue.pause();
-      }
-    };
-
-
-    /**
-     * Clear execution queue, thus stopping the program
-     *
-     */
-    this.stop = function () {
-      if (queue) {
-        queue.clear();
+      if (queue.isEmpty()) {
+        queue.push(wrapCommand(program, execute));
       }
     };
 
@@ -559,27 +358,26 @@
      * @param  {String} programText
      */
     this.init = function (programText) {
-      if (queue === undefined) {
-        queue = new Queue();
-      } else {
-        queue.clear();
-      }
-
       program = parseProgram(programText);
+      events.trigger('program.initialized');
     };
 
 
     // Set up event listeners
     (function () {
-      var codeEdited = true;
-      var unparsedCode = '';
+      var
+        codeEdited = true,
+        unparsedCode = '';
 
       events.subscribe({
-        // Run button clicked
+        // Todo: clean up needlessly public interfaces
         'ui.program.run': function () {
           if (codeEdited) { // If code has changed, parse the updated program
+
             try {
+
               self.init(unparsedCode);
+
             } catch (e) {
               global.alert(e.message);
             }
@@ -588,10 +386,6 @@
           self.run();
           codeEdited = false;
         },
-
-        'ui.program.pause': self.pause,
-
-        'ui.program.reset': self.stop,
 
         // Code editor content changed
         'ui.code.edited': function (data) {
