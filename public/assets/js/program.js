@@ -105,7 +105,7 @@
       }
 
       if (!matches) { // No matches found means we failed to parse
-        throw new ProgramException('Failed to parse instruction: "' + instruction + '"');
+        throw new ProgramException('Failed to parse instruction: "' + instruction + '"', instruction);
       }
 
       // Build output command objected based on what pattern matched
@@ -204,6 +204,10 @@
         }
 
         return block;
+      }
+
+      if (programLines.length < 2 && programLines[0] === '') {
+        return [];
       }
 
       return parseBlock();
@@ -345,6 +349,10 @@
     this.init = function (programText) {
       program = parseProgram(programText);
       events.trigger('program.initialized');
+
+      if (program.length === 0) {
+        events.trigger('program.empty');
+      }
     };
 
 
@@ -362,14 +370,19 @@
             try {
 
               self.init(unparsedCode);
+              codeEdited = unparsedCode === '';
 
             } catch (e) {
-              global.alert(e.message);
+              program = [];
+              if (e instanceof App.ProgramException) {
+                events.trigger('error.program', e);
+              } else { // Ewww
+                throw e;
+              }
             }
           }
 
           self.run();
-          codeEdited = false;
         },
 
         // Code editor content changed

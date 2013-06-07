@@ -13,7 +13,7 @@
     helpers = [NOTICE, SUCCESS, WARNING, ERROR],
     i;
 
-  ui.notify = function (message, type) {
+  ui.notify = function (message, type, additionalClass) {
 
     var $notification;
 
@@ -23,14 +23,19 @@
         .addClass(type)
         .html(message)
         .hide();
+
+    if (additionalClass) {
+      $notification.addClass(additionalClass);
+    }
+
     $container.prepend($notification);
     return $notification.slideDown(150, 'swing');
 
   };
 
   function createHelper(type) {
-    ui.notify[type] = function (message) {
-      return ui.notify(message, type);
+    ui.notify[type] = function (message, additionalClass) {
+      return ui.notify(message, type, additionalClass);
     };
   }
 
@@ -39,9 +44,14 @@
     createHelper(helpers[i]);
   }
 
-  ui.notify.clear = function () {
-    $container.find('.flashmsg')
-        .slideUp(150, 'swing', function () { $(this).remove(); });
+  ui.notify.clear = function (withClass) {
+    var $messages = $container.find('.flashmsg');
+
+    if (withClass) {
+      $messages = $messages.filter('.' + withClass);
+    }
+
+    $messages.slideUp(150, 'swing', function () { $(this).remove(); });
   };
 
   $(document).on('click', '.flashmsg', function () {

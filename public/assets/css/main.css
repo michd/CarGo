@@ -58,6 +58,16 @@ header h1 {
   color: #400500;
 }
 
+.flashmsg pre {
+  display: block;
+  font-family: 'Consolas', 'monaco', monospace;
+  background-color: #FFF;
+  background-color: rgba(255, 255, 255, .5);
+  margin-top: 10px;
+  padding: 10px;
+  color: #222;
+}
+
 
 #grid, #program, #reference {
   margin: 20px 0 0 20px;
