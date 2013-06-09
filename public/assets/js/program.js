@@ -50,6 +50,8 @@
       car              = App.car, // The car is what the program is centered on.
       queue            = App.queue,
       ProgramException = App.ProgramException,
+      lineCount        = -1,
+
       self             = this;
 
 
@@ -107,6 +109,8 @@
       if (!matches) { // No matches found means we failed to parse
         throw new ProgramException('Failed to parse instruction: "' + instruction + '"', instruction);
       }
+
+      output.plainText = instruction;
 
       // Build output command objected based on what pattern matched
       switch (instructionType) {
@@ -183,6 +187,8 @@
           parsed = parseInstruction(programLines[i]);
           i += 1;
 
+          parsed.lineNumber = lineCount += 1;
+
           if (parsed.instructions) {
             // parsed instuctions starts a new block of instructions
             // Note the plural.
@@ -205,6 +211,7 @@
 
         return block;
       }
+      lineCount += 1;
 
       if (programLines.length < 2 && programLines[0] === '') {
         return [];
@@ -259,6 +266,8 @@
 
         // Iterator.
         i;
+
+      events.trigger('program.executing', command.lineNumber);
 
       // If there is a condition to this command, figure out whether it's met
       if (command.condition) {
@@ -348,7 +357,7 @@
      */
     this.init = function (programText) {
       program = parseProgram(programText);
-      events.trigger('program.initialized');
+      events.trigger('program.initialized', program);
 
       if (program.length === 0) {
         events.trigger('program.empty');
@@ -383,6 +392,7 @@
           }
 
           self.run();
+          events.trigger('program.run', program);
         },
 
         // Code editor content changed

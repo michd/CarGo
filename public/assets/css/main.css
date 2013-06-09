@@ -88,9 +88,24 @@ header h1 {
   display: none;
 }
 
-#program-input {
+#program-input, #program-progress {
+  border: solid 1px #666;
   width: 400px;
-  height: 300px;
+  min-height: 300px;
+  background-color: #FFF;
+  color: #000;
+  font-family: 'Consolas', 'monaco', monospace;
+  font-size: 16px;
+  padding: 5px;
+  line-height: 1.4;
+}
+
+#program-progress {
+  display: none;
+}
+
+#program-progress .line.active {
+  background-color: #CCC;
 }
 
 #reference {
@@ -118,7 +133,7 @@ section li {
   margin-bottom: 15px;
 }
 
-section code, section pre {
+#reference code, #reference pre {
   background-color: #FFF;
   border: solid 1px #D0D0D0;
   border-radius: 4px;
@@ -126,11 +141,11 @@ section code, section pre {
   color: #444;
 }
 
-section pre {
+#reference pre {
   display: block;
 }
 
-section pre code {
+#reference pre code {
   background: none;
   border: none;
   border-radius: 0;

@@ -23,7 +23,7 @@
       <menu>
         <li><button data-event="program.run, queue.resume">Run</button></li>
         <li><button data-event="queue.pause">Pause</button></li>
-        <li><button data-event="grid.reset, queue.clear, sound.stopall">Reset</button></li>
+        <li><button data-event="grid.reset, queue.clear, sound.stopall, program.stop">Reset</button></li>
       </menu>
       <menu id="speed">
         <li><button data-event="queue.speed.faster">Faster</button></li>
@@ -31,6 +31,7 @@
         <li><button data-event="queue.speed.slower">Slower</button></li>
       </menu>
       <textarea id="program-input"></textarea>
+      <pre id="program-progress"></pre>
     </section>
 
     <section id="reference">
@@ -111,6 +112,7 @@ END</code></pre>
   <script src="/assets/js/grid.js"></script>
   <script src="/assets/js/car.js"></script>
   <script src="/assets/js/program.js"></script>
+  <script src="/assets/js/ui/program.js"></script>
   <script src="/assets/js/ui/buttons.js"></script>
   <script src="/assets/js/bootstrap.js"></script>
 </body>

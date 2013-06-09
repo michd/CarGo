@@ -52,7 +52,13 @@
      */
     function executeNext() {
 
-      if (paused || isEmpty()) { return; }
+      if (paused) { return; }
+
+      if (isEmpty()) {
+        // I assume this only happens when the program has finished executing
+        events.trigger('queue.empty');
+        return;
+      }
 
       commandQueue.shift()();
       clearTimeout(timeout);
