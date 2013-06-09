@@ -17,7 +17,9 @@
 
     sample, player,
 
-    events = App.eventDispatcher;
+    events = App.eventDispatcher,
+
+    sfxEnabled = false;
 
   // Init players
   for (sample in samples) {
@@ -42,10 +44,19 @@
     }
   }
 
+  function toggleSfx(on) {
+    sfxEnabled = on === undefined ? !sfxEnabled : !!on;
+    if (!sfxEnabled) {
+      stopAll();
+    }
+  }
+
   function play(sampleName, allowRestart, solo) {
     var
       player = players[sampleName],
       otherPlayer;
+
+    if (!sfxEnabled) { return; }
 
     if (!player) { return; }
 
@@ -104,6 +115,8 @@
     'reached-finish': function () {
       play('finish', false, true);
     },
+
+    'ui.sound.toggle': toggleSfx,
 
     'ui.reset': stopAll
   });
