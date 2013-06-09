@@ -49,10 +49,11 @@
      *
      * Doesn't do anything if the paused flag is set or the queue's empty
      *
+     * @param {Boolean} oneStep If true, don't set a timer for executing next step
      */
-    function executeNext() {
+    function executeNext(oneStep) {
 
-      if (paused) { return; }
+      if (paused && !oneStep) { return; }
 
       if (isEmpty()) {
         // I assume this only happens when the program has finished executing
@@ -62,6 +63,9 @@
 
       commandQueue.shift()();
       clearTimeout(timeout);
+
+      if (oneStep) { return; }
+
       timeout = setTimeout(executeNext, stepDelay);
     }
 
@@ -85,6 +89,20 @@
     this.resume = function () {
       paused = false;
       setTimeout(executeNext, stepDelay);
+      return self;
+    };
+
+
+    /**
+     * Exexcute a single step only
+     *
+     * This sets the pause flag as well.
+     *
+     * @return {Queue} self
+     */
+    this.step = function () {
+      paused = true;
+      executeNext(true);
       return self;
     };
 
@@ -114,9 +132,9 @@
         commandQueue.push(command);
       }
 
-      if (wasEmpty && !paused) {
-        self.resume();
-      }
+      // if (wasEmpty && !paused) {
+      //   self.resume();
+      // }
 
       return self;
     };
@@ -147,9 +165,9 @@
         commandQueue.unshift(command);
       }
 
-      if (wasEmpty && !paused) {
-        self.resume();
-      }
+      // if (wasEmpty && !paused) {
+      //   self.resume();
+      // }
 
       return self;
     };
@@ -227,6 +245,7 @@
       'ui.speed.slower': self.speed().slower,
       'ui.pause':        self.pause,
       'ui.run':          self.resume,
+      'ui.step':         self.step,
       'ui.reset':        self.clear,
       'program.initialized':   self.clear
     });

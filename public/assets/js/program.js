@@ -371,30 +371,31 @@
         codeEdited = true,
         unparsedCode = '';
 
-      events.subscribe({
-        // Todo: clean up needlessly public interfaces
-        'ui.run': function () {
-          if (codeEdited) { // If code has changed, parse the updated program
+      function startProgram() {
+        if (codeEdited) { // If code has changed, parse the updated program
+          try {
 
-            try {
+            self.init(unparsedCode);
+            codeEdited = unparsedCode === '';
 
-              self.init(unparsedCode);
-              codeEdited = unparsedCode === '';
-
-            } catch (e) {
-              program = [];
-              if (e instanceof App.ProgramException) {
-                events.trigger('error.program', e);
-              } else { // Ewww
-                throw e;
-              }
+          } catch (e) {
+            program = [];
+            if (e instanceof App.ProgramException) {
+              events.trigger('error.program', e);
+            } else { // Ewww
+              throw e;
             }
           }
+        }
 
-          self.run();
-          events.trigger('program.run', program);
-        },
+        events.trigger('program.run', program);
+        self.run();
+      }
 
+      events.subscribe({
+        // Todo: clean up needlessly public interfaces
+        'ui.run': startProgram,
+        'ui.step': startProgram,
         // Code editor content changed
         'ui.code.edited': function (data) {
           unparsedCode = data;

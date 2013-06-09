@@ -2,10 +2,23 @@
   "use strict";
 
   var
+    INDENT_CHARS = "  ",
     ui     = App.namespace('ui'),
     events = App.eventDispatcher,
     $programProgress = $('#program-progress'),
-    programLines = [];
+    programLines = [],
+    lastProgram = [];
+
+  function indent(text, depth) {
+    var
+      spaces = '',
+      i;
+
+    while (depth--) {
+      spaces += INDENT_CHARS;
+    }
+    return spaces + text;
+  }
 
   function commandToText(command, depth) {
     var
@@ -16,14 +29,14 @@
 
     commandText = (command instanceof Array) ?
         "" :
-        new Array(depth + 1).join("  ") + command.plainText;
+        indent(command.plainText, depth);
 
     if (command.instructions && command.instructions.length > 0) {
       commandText += "\n";
       for (i = 0; i < command.instructions.length; i += 1) {
         commandText += commandToText(command.instructions[i], depth + 1) +  "\n";
       }
-      commandText += new Array(depth + 1).join("  ") + "END";
+      commandText += indent("END", depth);
     }
     return commandText;
   }
@@ -38,6 +51,8 @@
       $line,
       i;
 
+    if (program === lastProgram) { return; }
+
     $programProgress.html('').text('');
     programLines = [];
 
@@ -46,6 +61,8 @@
       programLines.push($line);
       $programProgress.append($line, "\n");
     }
+
+    lastProgram = program;
   }
 
   function highlightLine(lineNumber) {
@@ -61,6 +78,7 @@
 
   events.subscribe({
     'program.run': function (program) {
+
       populateProgramProgress(program);
       toggleProgramProgress(true);
     },
