@@ -373,7 +373,7 @@
 
       events.subscribe({
         // Todo: clean up needlessly public interfaces
-        'ui.program.run': function () {
+        'ui.run': function () {
           if (codeEdited) { // If code has changed, parse the updated program
 
             try {

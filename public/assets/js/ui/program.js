@@ -65,7 +65,7 @@
       toggleProgramProgress(true);
     },
     'program.executing': highlightLine,
-    'ui.program.stop': function () {
+    'ui.reset': function () {
       toggleProgramProgress(false);
     },
     'queue.empty': function () {

@@ -89,7 +89,7 @@
 
     // Set up event listeners
     (function () {
-      events.subscribe('ui.grid.reset', self.reset);
+      events.subscribe('ui.reset', self.reset);
     }());
 
     App.grid = self;

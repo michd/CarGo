@@ -59,11 +59,11 @@
   });
 
   events.subscribe({
-    'ui.queue.resume': function () {
+    'ui.run': function () {
       $('#speed').show();
     },
 
-    'ui.queue.pause': function () {
+    'ui.pause': function () {
       $('#speed').hide();
     }
   });

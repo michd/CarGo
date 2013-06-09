@@ -105,7 +105,7 @@
       play('finish', false, true);
     },
 
-    'ui.sound.stopall': stopAll
+    'ui.reset': stopAll
   });
 
 }(this.CARGO, this.document, this));

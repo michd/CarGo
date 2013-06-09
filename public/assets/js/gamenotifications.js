@@ -25,7 +25,7 @@
       notify.success('Good job! You\'ve reached the finish!', 'program');
     },
 
-    'ui.program.run': function () {
+    'ui.run': function () {
       notify.clear('program');
     }
   });

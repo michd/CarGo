@@ -222,12 +222,12 @@
 
     events.subscribe({
       // Todo: clean up all these needlessly public interfaces
-      'ui.queue.speed.faster': self.speed().faster,
-      'ui.queue.speed.reset':  self.speed().reset,
-      'ui.queue.speed.slower': self.speed().slower,
-      'ui.queue.pause':        self.pause,
-      'ui.queue.resume':       self.resume,
-      'ui.queue.clear':        self.clear,
+      'ui.speed.faster': self.speed().faster,
+      'ui.speed.reset':  self.speed().reset,
+      'ui.speed.slower': self.speed().slower,
+      'ui.pause':        self.pause,
+      'ui.run':          self.resume,
+      'ui.reset':        self.clear,
       'program.initialized':   self.clear
     });
 
