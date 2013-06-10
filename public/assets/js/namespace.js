@@ -9,7 +9,7 @@
   App.namespace = function (ns_string) {
     var
       parts = ns_string.split('.'),
-      parent = ns,
+      parent = App,
       i = 0,
       iMax = 0;
 
