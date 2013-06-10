@@ -1,6 +1,8 @@
 (function (App, document, global) {
   "use strict";
 
+  // Event based sound effect player
+
   var
     samples = {
       'start':     '/assets/wav/start.wav',
@@ -11,8 +13,10 @@
       'finish':    '/assets/wav/finish.wav'
     },
 
+    // Audio instances mapped to sample names
     players = {},
 
+    // Playback timeouts mapped to sample names
     timeouts = {},
 
     sample, player,
@@ -33,6 +37,11 @@
     }
   }
 
+
+  /**
+   * Immediately stops all audio players from playing
+   *
+   */
   function stopAll() {
     var player;
 
@@ -44,6 +53,14 @@
     }
   }
 
+
+  /**
+   * Turn sound effects on or off
+   *
+   * If being turned off, stops all
+   *
+   * @param  {Boolean} on If onspecifies, flips current setting
+   */
   function toggleSfx(on) {
     sfxEnabled = on === undefined ? !sfxEnabled : !!on;
     if (!sfxEnabled) {
@@ -51,6 +68,14 @@
     }
   }
 
+
+  /**
+   * Play a sample by name
+   *
+   * @param  {String} sampleName
+   * @param  {Boolean} allowRestart Retriggers sample if it's already playing, otherwise queues
+   * @param  {Boolean} solo Stop all other sounds first?
+   */
   function play(sampleName, allowRestart, solo) {
     var
       player = players[sampleName],
@@ -87,6 +112,8 @@
     player.play();
   }
 
+
+  // Tie samples to events
   events.subscribe({
     'program.initialized': function () {
       play('start');

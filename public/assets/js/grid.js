@@ -1,20 +1,37 @@
 (function (App, $, global) {
+  "use strict";
 
   var
     $grid = $('#grid'),
     events = App.eventDispatcher;
 
+  /**
+   * Describes the game grid, where the user's program will be executed
+   *
+   * Coupled with App.Cell and App.Car
+   *
+   * @param  {Object} gameData Structured object with data to build the grid
+   * @return {App.Grid}
+   */
   App.Grid = function (gameData) {
 
     var
+      // 2-dimensional array of all the Cells
       data = [],
       self = this;
 
-    if (this.constructor !== App.Grid) { //ensure intantiating
+    // Ensure instantiation
+    if (this.constructor !== App.Grid) {
       return new App.Grid(gameData);
     }
 
-    // Fills in cells in a rectangle
+
+    /**
+     * Fills in cells in a rectangle, for easily populating and area
+     *
+     * @param  {Array} coords Endpoints of rectangle ([[x1, y1], [x2, y2]])
+     * @param  {String} type  What to fill this rectangle with
+     */
     function drawRect(coords, type) {
       var
         x, y,
@@ -22,6 +39,7 @@
         xDir = coords[0][0] <= coords[1][0] ? 1 : -1,
         yDir = coords[0][1] <= coords[1][1] ? 1 : -1;
 
+      // TODO: fix loop condition so it actually works with both directions
       for (x = coords[0][0]; x <= coords[1][0]; x += xDir) {
         for (y = coords[0][1]; y <= coords[1][1]; y += yDir) {
           cell = data[y][x];
@@ -30,19 +48,33 @@
       }
     }
 
-    this.getCell = function (pos) {
+    /**
+     * Retrieve a Cell based on coordinates
+     *
+     * @param  {Array} pos Coordinates ([x, y])
+     * @return {App.Cell|Boolean} Either the cell, or false if no such cell
+     */
+    function getCell(pos) {
       if (data[pos[1]] !== undefined) {
         return data[pos[1]][pos[0]] || false;
       }
       return false;
-    };
+    }
 
+
+    this.getCell = getCell;
+
+
+    /**
+     * Initialized the game grid with game data
+     *
+     * Important: also initializes App.Car
+     *
+     * @param  {Object} gameData
+     * @return {App.Grid} self
+     */
     this.init = function (gameData) {
       var x, y, i, cellData, cell, $cell, $row, car, finish;
-
-      function getCell(pos) {
-        return data[pos[1]][pos[0]];
-      }
 
       // Create grid by building individual cells
       for (y = 0; y < gameData.height; y += 1) {
@@ -64,7 +96,7 @@
         cellData = gameData.content[i];
 
         if (cellData.pos !== undefined) {
-          cell = getCell(cellData.pos);
+          cell = self.getCell(cellData.pos);
           cell.toggleFlag(cellData.type, true);
         } else if (cellData.rect !== undefined) {
           drawRect(cellData.rect, cellData.type);
@@ -72,30 +104,39 @@
       }
 
       // Position finish
-      finish = getCell(gameData.goalPos);
+      finish = self.getCell(gameData.goalPos);
       finish.toggleFlag('finish', true);
 
       // Position car
       App.Car(getCell(gameData.startPos), gameData.startDirection, self);
 
+      return self;
     };
 
+
+    /**
+     * Restores the original state of the grid (as defined in gameData)
+     *
+     * @return {App.Grid} self
+     */
     this.reset = function () {
       data = [];
       $grid.find('.row').remove();
       self.init(gameData);
       App.car.place(self.getCell(gameData.startPos), gameData.startDirection);
+
+      return self;
     };
 
-    // Set up event listeners
-    (function () {
-      events.subscribe('ui.reset', self.reset);
-    }());
+    // Listen for events
+    events.subscribe('ui.reset', self.reset);
 
     App.grid = self;
 
+
+    // Override constructor (singletonize)
     App.Grid = function () {
-      //restore instance if overwritten
+      // Restore instance if overwritten
       App.grid = self;
       return self;
     };

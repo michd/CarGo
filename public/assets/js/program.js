@@ -3,7 +3,13 @@
 
   var events = App.eventDispatcher;
 
-
+  /**
+   * Custom exception for things that go wrong in the Program
+   *
+   * @param  {String} message
+   * @param  {String} instruction Where it all went wrong
+   * @return {App.ProgramException}
+   */
   App.ProgramException = function (message, instruction) {
     this.name = "CarGo ProgramException";
     this.message = message;
@@ -14,6 +20,11 @@
   };
 
 
+  /**
+   * Parses an executes the program written by the user
+   *
+   * @return {App.Program}
+   */
   App.Program = function () {
 
     var
@@ -341,16 +352,6 @@
 
 
     /**
-     * Exposes the queue's speed interface
-     *
-     * @return {Object}
-     */
-    this.speed = function () {
-      return queue.speed();
-    };
-
-
-    /**
      * Initialize the program by parsing a plaintext program
      *
      * @param  {String} programText
@@ -373,12 +374,12 @@
 
       function startProgram() {
         if (codeEdited) { // If code has changed, parse the updated program
-          try {
 
+          try {
             self.init(unparsedCode);
             codeEdited = unparsedCode === '';
-
           } catch (e) {
+
             program = [];
             if (e instanceof App.ProgramException) {
               events.trigger('error.program', e);
@@ -408,12 +409,11 @@
 
     App.program = self;
 
-    // Override constructor
+    // Override constructor (singletonize)
     App.Program = function () {
       App.program = self;
       return self;
     };
-
   };
 
 }(this.CARGO, this));

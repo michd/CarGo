@@ -25,10 +25,9 @@
      */
     logEvents = false,
 
+    // Array of event names that will be hidden from logging
     logIgnoredEvents = [];
 
-
-  // ## Private methods - however exposed through the public interface
 
   /**
    * Triggers an event and sends it to all subscribers of that event
@@ -42,31 +41,32 @@
     var
       subscribers = eventSubscribers[eventName] || [],
       i, iMax,
-      logThis = (logEvents && logIgnoredEvents.indexOf(eventName) === -1);
+      logThis = (logEvents && logIgnoredEvents.indexOf(eventName) === -1),
+      hasData = !!data;
 
     // Arrayify data
     data = (data instanceof Array) ? data : [data];
 
-    //Set a default value for `this` in the callback
+    // Set a default value for `this` in the callback
     context = context || App;
 
     // Do some logging
     if (logThis) {
-      console.log(
-        '[Event] {' +  eventName + '} triggered with data: ',
-        data,
-        ' and sent to {' + subscribers.length + '} subscribers.'
-      );
+      if (hasData) {
+        console.log('[Event] {' + eventName + '} sent to {' + subscribers.length + '} with data: ', data);
+      } else {
+        console.log('[Event] {' + eventName + '} sent to {' + subscribers.length + '}');
+      }
     }
 
     for (i = 0, iMax = subscribers.length; i < iMax; i += 1) {
       subscribers[i].callback.apply(context, data);
     }
-
   }
 
+
   /**
-   * Add a single subscribtion: callback function to list of subscribers
+   * Add a single subscription: callback function to list of subscribers
    * for eventName
    *
    * @param  {String}   eventName
@@ -123,14 +123,14 @@
       return subscribeHash(eventNameOrHash);
     }
 
-    return subscribeSingle(eventNameOrHash, callback);
+    subscribeSingle(eventNameOrHash, callback);
   }
 
 
   /**
    * Remove a certain callback function from the subscribers
    *
-   * The function provided mus be identical to the one passed to subscribe.
+   * The function provided must be identical to the one passed to subscribe.
    *
    * @param  {String}
    * @param  {Function} existingCallback

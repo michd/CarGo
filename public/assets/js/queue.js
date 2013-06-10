@@ -14,6 +14,8 @@
    *
    * Lets you push stuff to the end of the queue as well as unshift it to
    * give priority over previously queued commands.
+   *
+   * @param {Number} stepDelay | Initial delay in ms between steps
    */
   App.Queue = function (stepDelay) {
     var
@@ -61,9 +63,13 @@
         return;
       }
 
+      // Execute the next command up, remove from queue
       commandQueue.shift()();
+
+      // Clear any double timeouts
       clearTimeout(timeout);
 
+      // If only doing one step, don't set a new timeout
       if (oneStep) { return; }
 
       timeout = setTimeout(executeNext, stepDelay);
@@ -72,7 +78,8 @@
 
     /**
      * Prevent executing the next command in the queue for the time being
-     * @return {Queue} self
+     *
+     * @return {App.Queue} self
      */
     this.pause = function () {
       paused = true;
@@ -84,7 +91,7 @@
     /**
      * (Re)start executing the queue.
      *
-     * @return {Queue} self
+     * @return {App.Queue} self
      */
     this.resume = function () {
       paused = false;
@@ -98,7 +105,7 @@
      *
      * This sets the pause flag as well.
      *
-     * @return {Queue} self
+     * @return {App.Queue} self
      */
     this.step = function () {
       paused = true;
@@ -113,7 +120,7 @@
      * If the queue was empty and not paused, resumes execution
      *
      * @param  {Object|Array} command parsed command | array of commands
-     * @return {Queue} self
+     * @return {App.Queue} self
      */
     this.push = function (command) {
       var
@@ -131,10 +138,6 @@
         // A single command was passed
         commandQueue.push(command);
       }
-
-      // if (wasEmpty && !paused) {
-      //   self.resume();
-      // }
 
       return self;
     };
@@ -165,16 +168,14 @@
         commandQueue.unshift(command);
       }
 
-      // if (wasEmpty && !paused) {
-      //   self.resume();
-      // }
-
       return self;
     };
 
+
     /**
      * Empties the execution queue
-     * @return {[type]} [description]
+     *
+     * @return {App.Queue} self
      */
     this.clear = function () {
       commandQueue = [];
@@ -252,6 +253,8 @@
 
     App.queue = self;
 
+
+    // Override constructor (singletonize)
     App.Queue = function () {
 
       App.queue = self;

@@ -1,15 +1,10 @@
 (function (App, $, document) {
+  "use strict";
 
-  var eventDispatcher = App.eventDispatcher;
-
+  // Trigger a ui. event with eventDispatcher when a button with a
+  // data-event attribute is clicked
   $(document).on('click', 'button[data-event]', function (event) {
-    var
-      events = $(event.target).data('event').split(/,\s*/),
-      i;
-
-    for (i = 0; i < events.length; i += 1) {
-      eventDispatcher.trigger('ui.' + events[i]);
-    }
+    App.eventDispatcher.trigger('ui.' + $(event.target).data('event'));
   });
 
 }(this.CARGO, this.jQuery, this.document));
