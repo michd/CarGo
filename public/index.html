@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <link href='http://fonts.googleapis.com/css?family=Jockey+One|Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/assets/css/reset.css" type="text/css">
   <link rel="stylesheet" href="/assets/css/main.css" type="text/css">
   <link rel="stylesheet" href="/assets/css/grid.css" type="text/css">
@@ -17,22 +18,25 @@
     <div id="flash-messages"></div>
 
     <section id="game-area">
+      <header>
+        <div class="gamestat">
+          Commands executed:
+          <span id="commands-executed">0</span>
+        </div>
 
-      <div class="gamestat">
-        Commands executed:
-        <span id="commands-executed">0</span>
-      </div>
-
-      <div class="gamestat">
-        Credits collected:
-        <span id="credits-collected">0/0</span>
-      </div>
+        <div class="gamestat">
+          Credits collected:
+          <span id="credits-collected">0/0</span>
+        </div>
+      </header>
 
       <div id="grid"></div>
     </section>
 
     <section id="program">
-      <h1>Program</h1>
+      <header>
+        <h1>Program</h1>
+      </header>
       <menu>
         <li><button data-event="run">Run</button></li>
         <li><button data-event="step">Step</button></li>
@@ -49,7 +53,9 @@
     </section>
 
     <section id="reference">
-      <h1>Language reference</h1>
+      <header>
+        <h1>Language reference</h1>
+      </header>
       <p> Here's a brief overview of the commands and constructs at your disposal.</p>
 
       <h2>Commands</h2>

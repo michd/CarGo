@@ -43,7 +43,7 @@
 
 .cell.car {
   position: relative;
-  background-color: #AAA;
+  background-color: #80D0FF;
 }
 
 .cell.car:before {
@@ -69,22 +69,22 @@
 }
 
 .cell.car.u:before {
-  border-bottom-color: #00A;
+  border-bottom-color: #00649F;
   margin-top: -25px;
 }
 
 .cell.car.d:before {
-  border-top-color: #00A;
+  border-top-color: #00649F;
   margin-top: -8px;
 }
 
 .cell.car.l:before {
-  border-right-color: #00A;
+  border-right-color: #00649F;
   margin-left: -25px;
 }
 
 .cell.car.r:before {
-  border-left-color: #00A;
+  border-left-color: #00649F;
   margin-left: -8px;
 }
 
@@ -100,9 +100,9 @@
   left: 5px;
   top: 5px;
   border-radius: 50%;
-  background-color: #EE0;
-  box-shadow: inset -1px -1px #CC0,
-              inset 2px 2px #FF5,
+  background-color: #ffa333;
+  box-shadow: inset -1px -1px #7C613E,
+              inset 1px 1px #FFC680,
               inset 0 0 2px #BB0,
               1px 1px 2px rgba(0, 0, 0, .25),
               inset 0 0 1px 1px #AA0;
