@@ -344,17 +344,17 @@
 
         // Maps program conditions to method names of the car
         carConditionMap = {
-          ON_CREDIT:  'onCredit',
-          ON_FINISH:  'onFinish',
-          WALL_AHEAD: 'isWallAhead'
+          'ON CREDIT':  'onCredit',
+          'ON FINISH':  'onFinish',
+          'WALL AHEAD': 'isWallAhead'
         },
 
         // Maps program commands to method names of the car
         carCommandMap = {
-          DRIVE:          'drive',
-          TURN_LEFT:      'turnLeft',
-          TURN_RIGHT:     'turnRight',
-          PICK_UP_CREDIT: 'pickUpCredit'
+          'DRIVE':          'drive',
+          'TURN LEFT':      'turnLeft',
+          'TURN RIGHT':     'turnRight',
+          'PICK UP CREDIT': 'pickUpCredit'
         };
 
       events.trigger('program.executing', command.lineNumber);
