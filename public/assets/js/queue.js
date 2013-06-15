@@ -15,7 +15,7 @@
    * Lets you push stuff to the end of the queue as well as unshift it to
    * give priority over previously queued commands.
    *
-   * @param {Number} stepDelay | Initial delay in ms between steps
+   * @param {Number} stepDelay Initial delay in ms between steps
    */
   App.Queue = function (stepDelay) {
     var
@@ -36,6 +36,7 @@
 
     /**
      * Shorthand to check if the queue has been emptied
+     *
      * @return {Boolean}
      */
     function isEmpty() {
@@ -44,21 +45,21 @@
 
 
     /**
-     * Execute whatever command is at the top of the queue right now
+     * Execute whatever function is at the top of the queue right now
      *
      * Clears any more timeouts set, then set the timeout for executing the
      * next command in the queue.
      *
      * Doesn't do anything if the paused flag is set or the queue's empty
      *
-     * @param {Boolean} oneStep If true, don't set a timer for executing next step
+     * @param {Boolean} oneStep If true, don't set a timeout for executing next
      */
     function executeNext(oneStep) {
 
       if (paused && !oneStep) { return; }
 
       if (isEmpty()) {
-        // I assume this only happens when the program has finished executing
+        // Only happens when the program has finished executing
         events.trigger('queue.empty');
         return;
       }
@@ -79,25 +80,21 @@
     /**
      * Prevent executing the next command in the queue for the time being
      *
-     * @return {App.Queue} self
      */
-    this.pause = function () {
+    function pause() {
       paused = true;
       clearTimeout(timeout);
-      return self;
-    };
+    }
 
 
     /**
      * (Re)start executing the queue.
      *
-     * @return {App.Queue} self
      */
-    this.resume = function () {
+    function resume() {
       paused = false;
-      setTimeout(executeNext, stepDelay);
-      return self;
-    };
+      timeout = setTimeout(executeNext, stepDelay);
+    }
 
 
     /**
@@ -105,19 +102,55 @@
      *
      * This sets the pause flag as well.
      *
-     * @return {App.Queue} self
      */
-    this.step = function () {
+    function step() {
       paused = true;
       executeNext(true);
-      return self;
-    };
+    }
 
 
     /**
-     * Add command(s) to the end of the execution queue
+     * Empties the execution queue
      *
-     * If the queue was empty and not paused, resumes execution
+     */
+    function clear() {
+      commandQueue = [];
+    }
+
+
+    /**
+     * Halves delay between steps, within limits.
+     *
+     */
+    function faster() {
+      if (stepDelay <= MIN_DELAY) { return; }
+      stepDelay /= 2;
+    }
+
+
+    /**
+     * Doubles delay between steps, within limits.
+     *
+     */
+    function slower() {
+      if (stepDelay >= MAX_DELAY) { return; }
+      stepDelay *= 2;
+    }
+
+
+    /**
+     * Resets delay between steps to default value
+     *
+     */
+    function resetSpeed() {
+      stepDelay = DEFAULT_DELAY;
+    }
+
+
+    // Public interface for adding to queue
+
+    /**
+     * Add command(s) to the end of the execution queue
      *
      * @param  {Object|Array} command parsed command | array of commands
      * @return {App.Queue} self
@@ -149,7 +182,7 @@
      * If the queue was empty and not paused, resume execution
      *
      * @param  {Object|Array} command parsed command | array of commands
-     * @return {Queue} self
+     * @return {App.Queue} self
      */
     this.unshift = function (command) {
       var
@@ -157,7 +190,7 @@
         i;
 
       if (command instanceof Array) {
-        // An array of command was passed (block)
+        // An array of commands was passed (block)
 
         for (i = command.length - 1; i >= 0; i -= 1) {
           commandQueue.unshift(command[i]);
@@ -172,83 +205,18 @@
     };
 
 
-    /**
-     * Empties the execution queue
-     *
-     * @return {App.Queue} self
-     */
-    this.clear = function () {
-      commandQueue = [];
-      return self;
-    };
-
-
     this.isEmpty = isEmpty;
 
 
-    /**
-     * Returns an interface for controlling the speed of the queue
-     *
-     * @return {Object}
-     */
-    this.speed = function () {
-
-      return {
-        /**
-         * Halves delay between steps, within limits.
-         *
-         * @return {Bool} false if limit reached and no change made
-         */
-        faster: function () {
-          if (stepDelay > MIN_DELAY) {
-            stepDelay /= 2;
-            return true;
-          }
-          return false;
-        },
-
-        /**
-         * Doubles delay between steps, within limits.
-         *
-         * @return {Bool} false if limit reached and no change made
-         */
-        slower: function () {
-          if (stepDelay < MAX_DELAY) {
-            stepDelay *= 2;
-            return true;
-          }
-          return false;
-        },
-
-
-        /**
-         * Resets delay between steps to default value
-         */
-        reset: function () {
-          stepDelay = DEFAULT_DELAY;
-        },
-
-        /**
-         * Gets the currently set step delay
-         *
-         * @return {Number}
-         */
-        currentStepDelay: function () {
-          return stepDelay;
-        }
-      };
-    };
-
     events.subscribe({
-      // Todo: clean up all these needlessly public interfaces
-      'ui.speed.faster': self.speed().faster,
-      'ui.speed.reset':  self.speed().reset,
-      'ui.speed.slower': self.speed().slower,
-      'ui.pause':        self.pause,
-      'ui.run':          self.resume,
-      'ui.step':         self.step,
-      'ui.reset':        self.clear,
-      'program.initialized':   self.clear
+      'ui.run':              resume,
+      'ui.pause':            pause,
+      'ui.step':             step,
+      'ui.reset':            clear,
+      'program.initialized': clear,
+      'ui.speed.faster':     faster,
+      'ui.speed.reset':      resetSpeed,
+      'ui.speed.slower':     slower
     });
 
     App.queue = self;
