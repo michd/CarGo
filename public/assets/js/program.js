@@ -11,8 +11,14 @@
    * @return {App.ProgramException}
    */
   App.ProgramException = function (message, instruction) {
+
     this.name = "CarGo ProgramException";
     this.message = message;
+
+    // Ensure instantiation
+    if (this.constructor !== App.ProgramException) {
+      return new App.ProgramException(message, instruction);
+    }
 
     if (instruction !== undefined) {
       this.instruction = instruction;
@@ -23,6 +29,11 @@
   /**
    * Parses an executes the program written by the user
    *
+   * @triggers {program.executing}
+   * @triggers {program.initialized}
+   * @triggers {program.empty}
+   * @triggers {program.run}
+   * @triggers {error.program}
    * @return {App.Program}
    */
   App.Program = function () {
@@ -61,7 +72,10 @@
       car              = App.car, // The car is what the program is centered on.
       queue            = App.queue,
       ProgramException = App.ProgramException,
-      lineCount        = -1,
+      lineCount        = 0,
+
+      codeEdited       = true,
+      unparsedCode     = '',
 
       self             = this;
 
@@ -79,11 +93,13 @@
      * Uses Regexes based on constants to parse each command and command type
      *
      * @param  {String} instruction Plaintext instruction
-     * @return {Object}
+     * @throws {ProgramException} If instruction matches no instruction type
+     * @return {Object} Command object, possibly unfinished if block starter
      */
     function parseInstruction(instruction) {
+
       var
-        // consts for indicating instruction types
+        // Consts for indicating instruction types
         SIMPLE            = 'simple',
         CONDITIONAL       = 'conditional',
         CONDITIONAL_BLOCK = 'conditionalBlock',
@@ -105,7 +121,7 @@
         output = {};
 
 
-      // Trim leading and trailing whitespace
+      // Trim leading and trailing whitespace, convert to uppercase
       instruction = instruction.replace(/^\s\s*/, '').replace(/\s\s*$/, '').toUpperCase();
 
       // Find matching instruction type
@@ -118,10 +134,13 @@
       }
 
       if (!matches) { // No matches found means we failed to parse
-        throw new ProgramException('Failed to parse instruction: "' + instruction + '"', instruction);
+        throw new ProgramException(
+          'Failed to parse instruction: "' + instruction + '"',
+          instruction
+        );
       }
 
-      output.plainText = instruction;
+      output.plainText = instruction; // For use in showing program progress
 
       // Build output command objected based on what pattern matched
       switch (instructionType) {
@@ -130,7 +149,7 @@
         output.instruction = matches[1];
         break;
 
-      case CONDITIONAL: // Intentional fallthrough
+      case CONDITIONAL:
         output.instruction = matches[3];
         break;
 
@@ -175,19 +194,32 @@
      * @return {Array} program listing
      */
     function parseProgram(textInput) {
+
       var
-        // Split program into lines
+        // Split program into lines after trimming whitespace
         programLines = textInput.replace(/^\s\s*/, '').replace(/\s\s*$/, '').split(/\n|\r/),
 
         // Iterator
         i = 0;
 
+
+      /**
+       * Recursively parse a block of isntructions
+       *
+       * Iterates over the list of program lines and adds commands to the block
+       * array, figures out when the block ends.
+       *
+       * When a new block opener is encountered, uses recursion
+       *
+       * @return {Object} command
+       */
       function parseBlock() {
+
         var
           // Begin with an empty list of instructions
           block = [],
 
-          // Store one line of parsed instuction
+          // Store one line of parsed instruction
           parsed = false,
 
           // Store whether we've reached the end of the block
@@ -201,7 +233,7 @@
           parsed.lineNumber = lineCount += 1;
 
           if (parsed.instructions) {
-            // parsed instuctions starts a new block of instructions
+            // Starts a new block of instructions
             // Note the plural.
 
             // Use recursion to fetch the block of instructions
@@ -222,7 +254,7 @@
 
         return block;
       }
-      lineCount += 1;
+
 
       if (programLines.length < 2 && programLines[0] === '') {
         return [];
@@ -233,15 +265,16 @@
 
 
     /**
-     * Wraps command objects in execute-calling function objects
+     * Wraps command objects in function calls
      *
-     * Works with arrays of commands too
+     * Works with arrays of commands too, through recursion
      *
      * @param  {Object|Array} command Single command objector array of them
      * @param  {Function} Function to wrap the command with
      * @return {Function|Array} Single function-wrapped command, or array of 'em
      */
     function wrapCommand(command, fn) {
+
       var
         isList = command instanceof Array,
         wrappedCommandList = [],
@@ -265,77 +298,82 @@
      * Employs recursion in case the command has a block of instructions
      *
      * @param  {Object} command
+     * @triggers {program.executing}
      */
     function execute(command) {
+
       var
         // To determine whether the instruction(s) of this command should be
         // run at all
         conditionMet = true,
 
         // Determine whether we're dealing with a loop here
-        isLoop = command.control === WHILE || command.control === UNTIL,
+        isLoop = [WHILE, UNTIL].indexOf(command.control) > -1,
+
+        // Maps program conditions to method names of the car
+        carConditionMap = {
+          ON_CREDIT:  'onCredit',
+          ON_FINISH:  'onFinish',
+          WALL_AHEAD: 'isWallAhead'
+        },
+
+        // Maps program commands to method names of the car
+        carCommandMap = {
+          DRIVE:          'drive',
+          TURN_LEFT:      'turnLeft',
+          TURN_RIGHT:     'turnRight',
+          PICK_UP_CREDIT: 'pickUpCredit'
+        },
+
+        block = [],
 
         // Iterator.
         i;
+
 
       events.trigger('program.executing', command.lineNumber);
 
       // If there is a condition to this command, figure out whether it's met
       if (command.condition) {
+        conditionMet = car[carConditionMap[command.condition]]();
 
-        // Which condition are we dealing with? Consult the correct API
-        // endpoint to figure out the result
-        switch (command.condition) {
-        case ON_CREDIT:
-          conditionMet = car.onCredit();
-          break;
-        case ON_FINISH:
-          conditionMet = car.onFinish();
-          break;
-        case WALL_AHEAD:
-          conditionMet = car.isWallAhead();
-          break;
-        }
-
-        // Check if we're working with a negatory control,
-        // if so, invert the result of the condition.
-        conditionMet = command.control === UNLESS || command.control === UNTIL ? !conditionMet : conditionMet;
+        // Negatory control? Invert conditionMet status
+        conditionMet = ([UNLESS, UNTIL].indexOf(command.control) > -1) ? !conditionMet : conditionMet;
       }
 
-      // If the condition was not met, don't bother with instruction execution
+      // Don't bother executing if condition wasn't met
       if (!conditionMet) { return; }
 
 
+
+      // Add instruction(s) the the execution queue
+      // TODO: separate command/block queueing logic to a function
+
       if (command.instructions) {
+        // Block of instructions
+
         // Prepend this block's instructions to the execution queue
-        var block = command.instructions.slice();
+        block = command.instructions.slice();
 
         if (isLoop) {
+          // Dealing with a loop, so after the block's instructions,
+          // re-add the block starter
           block.push(command);
         }
+
+        // Add list of commands at the top of the queue, to execute next
         queue.unshift(wrapCommand(block, execute));
-      } else {
-        if (isLoop) {
-          queue.unshift(wrapCommand(command, execute));
-        }
+
+      } else if (isLoop) {
+        // Single instruction that is a loop
+
+        // Queue this command to be evaluated again
+        queue.unshift(wrapCommand(command, execute));
       }
 
-      // Single command, not a block, so figure out what we're meant to do,
-      // and use the correct API endpoint to do it.
-      // TODO: map this functionality with an object
-      switch (command.instruction) {
-      case DRIVE:
-        car.drive();
-        break;
-      case TURN_LEFT:
-        car.turnLeft();
-        break;
-      case TURN_RIGHT:
-        car.turnRight();
-        break;
-      case PICK_UP_CREDIT:
-        car.pickUpCredit();
-        break;
+      if (command.instruction) {
+        // Single command, execute on car's interface
+        car[carCommandMap[command.instruction]]();
       }
     }
 
@@ -344,70 +382,73 @@
      * Steps through a parsed program listing and executes all the commands
      *
      */
-    this.run = function () {
+    function run() {
       if (queue.isEmpty()) {
         queue.push(wrapCommand(program, execute));
       }
-    };
+    }
 
 
     /**
-     * Initialize the program by parsing a plaintext program
+     * Parses raw program code, intializing the program for run
      *
-     * @param  {String} programText
+     * @param {String} programText Unparsed program code
+     * @triggers {program.initialized}
+     * @triggers {program.empty} If [program.length === 0]
      */
-    this.init = function (programText) {
+    function initialize(programText) {
       program = parseProgram(programText);
       events.trigger('program.initialized', program);
 
       if (program.length === 0) {
         events.trigger('program.empty');
       }
-    };
+    }
+
+
+    /**
+     * Starts running programming, optionally parsing new code first
+     *
+     * @triggers {error.program} if App.ProgramException caught
+     * @triggers {program.run}
+     */
+    function startProgram() {
+
+      if (codeEdited) {
+        try {
+          initialize(unparsedCode);
+          codeEdited = unparsedCode === '';
+        } catch (e) {
+
+          program = [];
+
+          if (e instanceof App.ProgramException) {
+            events.trigger('error.program', e);
+          } else { // Ewww
+            throw e;
+          }
+        }
+      }
+
+      events.trigger('program.run', program);
+      run();
+    }
 
 
     // Set up event listeners
-    (function () {
-      var
-        codeEdited = true,
-        unparsedCode = '';
+    events.subscribe({
+      'ui.run': startProgram,
+      'ui.step': startProgram,
 
-      function startProgram() {
-        if (codeEdited) { // If code has changed, parse the updated program
-
-          try {
-            self.init(unparsedCode);
-            codeEdited = unparsedCode === '';
-          } catch (e) {
-
-            program = [];
-            if (e instanceof App.ProgramException) {
-              events.trigger('error.program', e);
-            } else { // Ewww
-              throw e;
-            }
-          }
-        }
-
-        events.trigger('program.run', program);
-        self.run();
+      // Code editor content changed
+      'ui.code.edited': function (data) {
+        unparsedCode = data;
+        codeEdited = true;
       }
-
-      events.subscribe({
-        // Todo: clean up needlessly public interfaces
-        'ui.run': startProgram,
-        'ui.step': startProgram,
-        // Code editor content changed
-        'ui.code.edited': function (data) {
-          unparsedCode = data;
-          codeEdited = true;
-        }
-      });
-
-    }());
+    });
 
 
-    App.program = self;
+    App.program = this;
 
     // Override constructor (singletonize)
     App.Program = function () {
