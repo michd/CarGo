@@ -293,61 +293,17 @@
 
 
     /**
-     * Execute a given parsed command
+     * Adds the instructions of a command (or itself) to the execution queue
      *
-     * Employs recursion in case the command has a block of instructions
+     * Includes logic for queueing loops
      *
-     * @param  {Object} command
-     * @triggers {program.executing}
+     * @param  {Object} command Parsed command
      */
-    function execute(command) {
+    function queueNext(command, fn) {
 
       var
-        // To determine whether the instruction(s) of this command should be
-        // run at all
-        conditionMet = true,
-
-        // Determine whether we're dealing with a loop here
         isLoop = [WHILE, UNTIL].indexOf(command.control) > -1,
-
-        // Maps program conditions to method names of the car
-        carConditionMap = {
-          ON_CREDIT:  'onCredit',
-          ON_FINISH:  'onFinish',
-          WALL_AHEAD: 'isWallAhead'
-        },
-
-        // Maps program commands to method names of the car
-        carCommandMap = {
-          DRIVE:          'drive',
-          TURN_LEFT:      'turnLeft',
-          TURN_RIGHT:     'turnRight',
-          PICK_UP_CREDIT: 'pickUpCredit'
-        },
-
-        block = [],
-
-        // Iterator.
-        i;
-
-
-      events.trigger('program.executing', command.lineNumber);
-
-      // If there is a condition to this command, figure out whether it's met
-      if (command.condition) {
-        conditionMet = car[carConditionMap[command.condition]]();
-
-        // Negatory control? Invert conditionMet status
-        conditionMet = ([UNLESS, UNTIL].indexOf(command.control) > -1) ? !conditionMet : conditionMet;
-      }
-
-      // Don't bother executing if condition wasn't met
-      if (!conditionMet) { return; }
-
-
-
-      // Add instruction(s) the the execution queue
-      // TODO: separate command/block queueing logic to a function
+        block  = [];
 
       if (command.instructions) {
         // Block of instructions
@@ -362,17 +318,63 @@
         }
 
         // Add list of commands at the top of the queue, to execute next
-        queue.unshift(wrapCommand(block, execute));
+        queue.unshift(wrapCommand(block, fn));
 
       } else if (isLoop) {
         // Single instruction that is a loop
 
         // Queue this command to be evaluated again
-        queue.unshift(wrapCommand(command, execute));
+        queue.unshift(wrapCommand(command, fn));
+      }
+    }
+
+
+    /**
+     * Execute a given parsed command
+     *
+     * @param  {Object} command
+     * @triggers {program.executing}
+     */
+    function execute(command) {
+
+      var
+        // To determine whether the instruction(s) of this command should be
+        // run at all
+        conditionMet = true,
+
+        // Maps program conditions to method names of the car
+        carConditionMap = {
+          ON_CREDIT:  'onCredit',
+          ON_FINISH:  'onFinish',
+          WALL_AHEAD: 'isWallAhead'
+        },
+
+        // Maps program commands to method names of the car
+        carCommandMap = {
+          DRIVE:          'drive',
+          TURN_LEFT:      'turnLeft',
+          TURN_RIGHT:     'turnRight',
+          PICK_UP_CREDIT: 'pickUpCredit'
+        };
+
+      events.trigger('program.executing', command.lineNumber);
+
+      // If there is a condition to this command, figure out whether it's met
+      if (command.condition) {
+        conditionMet = car[carConditionMap[command.condition]]();
+
+        // Negatory control? Invert conditionMet status
+        conditionMet = ([UNLESS, UNTIL].indexOf(command.control) > -1) ? !conditionMet : conditionMet;
       }
 
+      // Don't bother executing / queuing if condition wasn't met
+      if (!conditionMet) { return; }
+
+      // Add any instructions the the execution queue
+      queueNext(command, execute);
+
+      // Execute any single instruction part of this command
       if (command.instruction) {
-        // Single command, execute on car's interface
         car[carCommandMap[command.instruction]]();
       }
     }
