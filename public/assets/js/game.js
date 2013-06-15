@@ -23,7 +23,7 @@
    * @triggers {game.command-execute-update}
    * @triggers {game.credits-update}
    * @triggers {game.got-all-credits}
-   * @return {App.Game}
+   * @return   {App.Game}
    */
   App.Game = function () {
     var
@@ -81,7 +81,7 @@
      * Resets the counters to zero
      *
      * @triggers {game.credits-update}
-     * @triggers {game.command-execute-update}     *
+     * @triggers {game.command-execute-update}
      */
     function reset() {
       commandExecutes = 0;

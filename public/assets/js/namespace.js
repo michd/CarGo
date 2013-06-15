@@ -6,18 +6,17 @@
 
   var App = global[topNamespace] !== undefined ? global[topNamespace] : {};
 
-  App.namespace = function (ns_string) {
+  App.namespace = function (nsString) {
     var
-      parts = ns_string.split('.'),
+      parts = nsString.split('.'),
       parent = App,
-      i = 0,
-      iMax = 0;
+      i = 0;
 
     if (parts[0] === topNamespace) {
       parts = parts.slice(1); // Remove redundant top level namespace
     }
 
-    for (i = 0, iMax = parts.length; i < iMax; i += 1) {
+    for (i = 0; i < parts.length; i += 1) {
 
       // Only create new object if part does not yet exist
       if (parent[parts[i]] === undefined) {

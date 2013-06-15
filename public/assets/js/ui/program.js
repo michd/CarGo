@@ -107,6 +107,7 @@
     lastProgram = program;
   }
 
+
   /**
    * Highlights the current line
    *
@@ -116,6 +117,7 @@
     $programProgress.find('.line').removeClass('active');
     $(programLines[lineNumber - 1]).addClass('active');
   }
+
 
   /**
    * Toggle between program progress module and program input module
@@ -129,6 +131,7 @@
     $programProgress.toggle(on);
     $programInput.toggle(!on);
   }
+
 
   // Subscribe to relevant events
   events.subscribe({

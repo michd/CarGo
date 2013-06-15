@@ -42,13 +42,14 @@
 
   };
 
+
   /**
    * Creates shorthand functions to access the types of notifications
    *
    * These helpers will be accessible as properties of the notify function,
    * usable at ui.notify.<helper>(message)
    *
-   * @param  {String} type notification type and helper name
+   * @param  {String} type Notification type and helper name
    */
   function createHelper(type) {
     ui.notify[type] = function (message, additionalClass) {
@@ -68,6 +69,7 @@
    * @param  {String} withClass Notification class filter to use
    */
   ui.notify.clear = function (withClass) {
+
     var $messages = $container.find('.flashmsg');
 
     if (withClass) {

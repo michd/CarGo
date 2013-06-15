@@ -191,12 +191,9 @@
      * @return   {App.Car} self
      */
     this.pickUpCredit = function () {
-      if (currentCell.takeCredit()) {
-        events.trigger('credit-picked-up');
-        currentCell.toggleFlag('credit', false);
-      } else {
-        events.trigger('credit-failed');
-      }
+      events.trigger(
+        currentCell.takeCredit() ? 'credit-picked-up' : 'credit-failed'
+      );
 
       return this;
     };

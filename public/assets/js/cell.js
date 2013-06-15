@@ -1,4 +1,4 @@
-(function (global, App, $) {
+(function (App, $) {
   "use strict";
 
   /**
@@ -135,4 +135,4 @@
     };
   };
 
-}(this, this.CARGO, this.jQuery));
+}(this.CARGO, this.jQuery));

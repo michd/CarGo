@@ -48,6 +48,7 @@
       }
     }
 
+
     /**
      * Retrieve a Cell based on coordinates
      *
@@ -55,9 +56,11 @@
      * @return {App.Cell|Boolean} Either the cell, or false if no such cell
      */
     function getCell(pos) {
+
       if (data[pos[1]] !== undefined) {
         return data[pos[1]][pos[0]] || false;
       }
+
       return false;
     }
 
@@ -74,7 +77,15 @@
      * @return {App.Grid} self
      */
     this.init = function (gameData) {
-      var x, y, i, cellData, cell, $cell, $row, car, finish;
+      var
+        x, y,
+        i,
+        cellData,
+        cell,
+        $row,
+        $cell,
+        car,
+        finish;
 
       // Create grid by building individual cells
       for (y = 0; y < gameData.height; y += 1) {

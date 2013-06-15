@@ -59,7 +59,7 @@
    *
    * If being turned off, stops all
    *
-   * @param  {Boolean} on If onspecifies, flips current setting
+   * @param  {Boolean} on If ons pecified, flips current setting
    */
   function toggleSfx(on) {
     sfxEnabled = on === undefined ? !sfxEnabled : !!on;
