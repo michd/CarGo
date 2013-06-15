@@ -11,15 +11,15 @@
    * @param    {App.Cell} startCell
    * @param    {String} startDirection Direction to be pointed at u|d|l|r
    * @param    {App.Grid} grid
-   * @triggers drive
-   * @triggers collission
-   * @triggers reached-finish
-   * @triggers credit-picked-up
-   * @triggers credit-failed
-   * @triggers turn-left
-   * @triggers turn-right
-   * @triggers car-init
-   * @return {App.Car}
+   * @triggers {drive}
+   * @triggers {collission}
+   * @triggers {reached-finish}
+   * @triggers {credit-picked-up}
+   * @triggers {credit-failed}
+   * @triggers {turn-left}
+   * @triggers {turn-right}
+   * @triggers {car-init}
+   * @return   {App.Car}
    */
   App.Car = function (startCell, startDirection, grid) {
 
@@ -29,7 +29,7 @@
       DOWN  = 'd',
       LEFT  = 'l',
       RIGHT = 'r',
-      DIRECTIONS = [UP, DOWN, LEFT, RIGHT],
+      DIRECTIONS = [UP, RIGHT, DOWN, LEFT], // Keep in this order for turn function
 
       currentCell = startCell,
       direction = startDirection,
@@ -51,6 +51,7 @@
      * @return {App.Cell|Boolean} Either a Cell instance or false if no cell
      */
     function getCellAhead() {
+
       var
         aX = currentCell.getPos()[0],
         aY = currentCell.getPos()[1];
@@ -87,45 +88,26 @@
 
 
     /**
-     * Attempt to drive forward (in the current direction) one cell
+     * Turns the car either left or right
      *
-     * If succesful, triggers a drive event
-     * If unsuccesful (wall or grid boundary ahead), triggers a collision event
-     * If succesful and reaches finish, triggers a reached-finish event
+     * Works by selecting next or previous direction from the DIRECTIONS array
      *
-     * @triggers drive
-     * @triggers collision
-     * @triggers reached-finish
-     * @return {App.Car} self
+     * @param  {String} where [LEFT|RIGHT]
      */
-    this.drive = function () {
-      var goalCell = getCellAhead();
+    function turn(where) {
+      var
+        curDirIndex = DIRECTIONS.indexOf(direction),
+        newDirIndex = curDirIndex + (where === RIGHT ? 1 : -1);
 
-      if (!goalCell || goalCell.isWall()) {
-        // Broadcast collision event
-        events.trigger('collision', currentCell);
-        return;
-      }
+      if (newDirIndex >= DIRECTIONS.length) { newDirIndex = 0; }
+      if (newDirIndex < 0) { newDirIndex = DIRECTIONS.length - 1; }
 
-      currentCell
-          .toggleFlag('car', false)
-          .toggleFlag([UP, DOWN, LEFT, RIGHT].join(' '), false);
+      direction = DIRECTIONS[newDirIndex];
+      updateDirection();
+    }
 
-      goalCell
-          .toggleFlag('car', true)
-          .toggleFlag(direction, true);
 
-      // Broadcast drive event
-      events.trigger('drive', [currentCell, goalCell]);
-
-      if (goalCell.isFinish()) {
-        events.trigger('reached-finish');
-      }
-
-      currentCell = goalCell;
-      return this;
-    };
-
+    // Sensors
 
     /**
      * Detect whether the cell forward (keeping in mind direction) is a wall
@@ -159,15 +141,54 @@
     };
 
 
+    // Actions
+
+    /**
+     * Attempt to drive forward (in the current direction) one cell
+     *
+     * @triggers {drive}          If no wall ahead
+     * @triggers {collision}      If wall ahead
+     * @triggers {reached-finish} If resulting cell is finish
+     * @return   {App.Car} self
+     */
+    this.drive = function () {
+
+      var goalCell = getCellAhead();
+
+      if (!goalCell || goalCell.isWall()) {
+        // Broadcast collision event
+        events.trigger('collision', currentCell);
+        return;
+      }
+
+      // Remove car and directions flags from old cell
+      currentCell
+          .toggleFlag('car', false)
+          .toggleFlag(DIRECTIONS.join(' '), false);
+
+      // Add car and direction flag to new cell
+      goalCell
+          .toggleFlag('car', true)
+          .toggleFlag(direction, true);
+
+      // Broadcast drive event
+      events.trigger('drive', [currentCell, goalCell]);
+
+      if (goalCell.isFinish()) {
+        events.trigger('reached-finish');
+      }
+
+      currentCell = goalCell;
+      return this;
+    };
+
+
     /**
      * Attempts to pick up a credit from the current cell
      *
-     * If this succeed (there was a credit), credit-picked-up is triggered
-     * If it fails (no credit), credit-failed is triggered
-     *
-     * @triggers credit-picked-up
-     * @triggers credit-failed
-     * @return {App.Car} self
+     * @triggers {credit-picked-up} If on credit
+     * @triggers {credit-failed}    If not on credit
+     * @return   {App.Car} self
      */
     this.pickUpCredit = function () {
       if (currentCell.takeCredit()) {
@@ -184,28 +205,12 @@
     /**
      * Changes the car's orientiation 90 degrees anticlockwise
      *
-     * @triggers turn-left
-     * @return {App.Car} self
+     * @triggers {turn-left}
+     * @return   {App.Car} self
      */
     this.turnLeft = function () {
-      switch (direction) {
-      case UP:
-        direction = LEFT;
-        break;
-      case DOWN:
-        direction = RIGHT;
-        break;
-      case LEFT:
-        direction = DOWN;
-        break;
-      case RIGHT:
-        direction = UP;
-        break;
-      }
-
-      updateDirection();
+      turn(LEFT);
       events.trigger('turn-left');
-
       return this;
     };
 
@@ -213,28 +218,12 @@
     /**
      * Changes the car's orientation 90 degrees clockwise
      *
-     * @triggers turn-right
-     * @return {App.Car} self
+     * @triggers {turn-right}
+     * @return   {App.Car} self
      */
     this.turnRight = function () {
-      switch (direction) {
-      case UP:
-        direction = RIGHT;
-        break;
-      case DOWN:
-        direction = LEFT;
-        break;
-      case LEFT:
-        direction = UP;
-        break;
-      case RIGHT:
-        direction = DOWN;
-        break;
-      }
-
-      updateDirection();
+      turn(RIGHT);
       events.trigger('turn-right');
-
       return this;
     };
 
@@ -249,7 +238,7 @@
     this.place = function (cell, direction) {
       currentCell
           .toggleFlag('car', false)
-          .toggleFlag([UP, DOWN, LEFT, RIGHT].join(' '), false);
+          .toggleFlag(DIRECTIONS.join(' '), false);
 
       cell
           .toggleFlag('car', true)
@@ -269,4 +258,5 @@
 
     events.trigger('car-init');
   };
+
 }(this, this.CARGO));
