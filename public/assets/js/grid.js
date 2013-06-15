@@ -18,6 +18,7 @@
     var
       // 2-dimensional array of all the Cells
       data = [],
+      contentCounters = {},
       self = this;
 
     // Ensure instantiation
@@ -87,6 +88,8 @@
         car,
         finish;
 
+      contentCounters = {};
+
       // Create grid by building individual cells
       for (y = 0; y < gameData.height; y += 1) {
 
@@ -104,7 +107,12 @@
 
       // Set classes for special cells
       for (i = 0; i < gameData.content.length; i += 1) {
+
         cellData = gameData.content[i];
+
+        // Count number of each type of cell
+        contentCounters[cellData.type] = contentCounters[cellData.type] || 0;
+        contentCounters[cellData.type] += 1;
 
         if (cellData.pos !== undefined) {
           cell = self.getCell(cellData.pos);
@@ -120,6 +128,9 @@
 
       // Position car
       App.Car(getCell(gameData.startPos), gameData.startDirection, self);
+
+      // Broadcast how many credits were placed
+      events.trigger('grid.credits-placed', contentCounters.credit);
 
       return self;
     };

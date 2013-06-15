@@ -107,9 +107,11 @@
 
     // Map events to functions
     events.subscribe({
-      'program.executing': commandExecuted,
-      'credit-picked-up':  creditPickedUp,
-      'program.run':       reset
+      'program.executing':   commandExecuted,
+      'credit-picked-up':    creditPickedUp,
+      'grid.credits-placed': setGameCredits,
+      'program.run':         reset,
+      'ui.reset':            reset
     });
 
 
@@ -124,5 +126,7 @@
     };
 
   };
+
+  App.game = new App.Game();
 
 }(this.CARGO));

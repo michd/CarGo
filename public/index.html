@@ -16,7 +16,20 @@
 
     <div id="flash-messages"></div>
 
-    <section id="grid"></section>
+    <section id="game-area">
+
+      <div class="gamestat">
+        Commands executed:
+        <span id="commands-executed">0</span>
+      </div>
+
+      <div class="gamestat">
+        Credits collected:
+        <span id="credits-collected">0/0</span>
+      </div>
+
+      <div id="grid"></div>
+    </section>
 
     <section id="program">
       <h1>Program</h1>
@@ -107,6 +120,8 @@ END</code></pre>
   <script src="/assets/js/namespace.js"></script>
   <script src="/assets/js/eventdispatcher.js"></script>
   <script src="/assets/js/ui/notifications.js"></script>
+  <script src="/assets/js/ui/game.js"></script>
+  <script src="/assets/js/game.js"></script>
   <script src="/assets/js/gamenotifications.js"></script>
   <script src="/assets/js/sfx.js"></script>
   <script src="/assets/js/queue.js"></script>
@@ -116,7 +131,6 @@ END</code></pre>
   <script src="/assets/js/program.js"></script>
   <script src="/assets/js/ui/program.js"></script>
   <script src="/assets/js/ui/buttons.js"></script>
-  <script src="/assets/js/game.js"></script>
   <script src="/assets/js/bootstrap.js"></script>
 </body>
 
