@@ -38,7 +38,7 @@
    *
    * Uses indent to get sub-blocks indented right
    *
-   * @param  {Object} command
+   * @param  {Object|Array} command One command object or array of 'em
    * @param  {Number} depth Block depth of this command
    * @return {String}
    */
@@ -59,7 +59,14 @@
         commandText += commandToText(command.instructions[i], depth + 1) +  "\n";
       }
       commandText += indent("END", depth);
+
+    } else if (command instanceof Array) { // Account for arrays of commands
+
+      for (i = 0; i < command.length; i += 1) {
+        commandText += commandToText(command[i], depth) + "\n";
+      }
     }
+
     return commandText;
   }
 

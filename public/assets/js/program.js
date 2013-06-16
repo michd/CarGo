@@ -401,7 +401,7 @@
      */
     function initialize(programText) {
       program = parseProgram(programText);
-      events.trigger('program.initialized', program);
+      events.trigger('program.initialized', [program]);
 
       if (program.length === 0) {
         events.trigger('program.empty');
@@ -435,7 +435,7 @@
         }
       }
 
-      events.trigger('program.run', program);
+      events.trigger('program.run', [program]);
       run();
     }
 
