@@ -110,8 +110,8 @@
       'program.executing':   commandExecuted,
       'credit-picked-up':    creditPickedUp,
       'grid.credits-placed': setGameCredits,
-      'program.run':         reset,
-      'ui.reset':            reset
+      'ui.reset':            reset,
+      'program.reset':       reset
     });
 
 

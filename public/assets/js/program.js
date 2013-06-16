@@ -33,6 +33,7 @@
    * @triggers {program.initialized}
    * @triggers {program.empty}
    * @triggers {program.run}
+   * @triggers {program.reset}
    * @triggers {error.program}
    * @return {App.Program}
    */
@@ -413,6 +414,7 @@
      *
      * @triggers {error.program} if App.ProgramException caught
      * @triggers {program.run}
+     * @triggers {program.reset} if codeEdited
      */
     function startProgram() {
 
@@ -420,6 +422,7 @@
         try {
           initialize(unparsedCode);
           codeEdited = unparsedCode === '';
+          events.trigger('program.reset');
         } catch (e) {
 
           program = [];

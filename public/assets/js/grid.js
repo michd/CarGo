@@ -151,7 +151,10 @@
     };
 
     // Listen for events
-    events.subscribe('ui.reset', self.reset);
+    events.subscribe({
+      'ui.reset':      self.reset,
+      'program.reset': self.reset
+    });
 
     App.grid = self;
 
