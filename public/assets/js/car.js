@@ -232,16 +232,17 @@
      * @param  {String} direction u|d|l|r
      * @return {App.Car} self
      */
-    this.place = function (cell, direction) {
+    this.place = function (cell, dir) {
       currentCell
           .toggleFlag('car', false)
           .toggleFlag(DIRECTIONS.join(' '), false);
 
       cell
           .toggleFlag('car', true)
-          .toggleFlag(direction, true);
+          .toggleFlag(dir, true);
 
       currentCell = cell;
+      direction = dir;
       return self;
     };
 
