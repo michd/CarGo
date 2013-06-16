@@ -48,6 +48,40 @@ header h1, header h2, header h3 {
   line-height: 1;
 }
 
+button {
+  position: relative;
+  font-family: "Jockey One", sans-serif;
+  font-size: 105%;
+  text-transform: uppercase;
+  background: #00649F;
+  border: none;
+  color: #E6F6FF;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .6);
+  padding: 2px 8px;
+  box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                     0    2px 0   #00304d,
+                     0    1px 3px rgba(0, 0, 0, .4);
+  margin-right: 5px;
+  border-radius: 2px 2px 0 0;
+  cursor: pointer;
+}
+
+button:hover {
+  color: #FFF;
+  background: #0079bf;
+  box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                     0    2px 0   #003f66,
+                     0    1px 3px rgba(0, 0, 0, .5);
+}
+
+button:active {
+ top: 2px;
+ text-shadow: 0 -1px 0 rgba(0, 0, 0, .4);
+ box-shadow: inset -1px -1px  0       rgba(255, 255, 255, .15),
+             inset   0   0    0px 1px #004f80,
+                     0   0px  0px     rgba(0, 0, 0, .7);
+}
+
 
 /* Flash notification messages */
 .flashmsg {
