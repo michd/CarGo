@@ -31,8 +31,10 @@ header {
   padding: 15px 20px;
   margin-bottom: 20px;
   border-bottom: solid 1px #001E30;
-  box-shadow: inset 0 -1px 0 rgba(128, 208, 255, 0.4),
-              0 0 5px rgba(0, 0, 0, .4);
+  -webkit-box-shadow: inset 0 -1px 0   rgba(128, 208, 255, 0.4),
+                            0  0   5px rgba(0, 0, 0, .4);
+          box-shadow: inset 0 -1px 0   rgba(128, 208, 255, 0.4),
+                            0  0   5px rgba(0, 0, 0, .4);
 }
 
 header h1 {
@@ -58,28 +60,43 @@ button {
   color: #E6F6FF;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, .6);
   padding: 2px 8px;
-  box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
-                     0    2px 0   #00304d,
-                     0    1px 3px rgba(0, 0, 0, .4);
   margin-right: 5px;
-  border-radius: 2px 2px 0 0;
   cursor: pointer;
+  -webkit-border-radius: 2px 2px 0 0;
+          border-radius: 2px 2px 0 0;
+  -webkit-box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #00304D,
+                             0    1px 3px rgba(0, 0, 0, .4);
+          box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #00304D,
+                             0    1px 3px rgba(0, 0, 0, .4);
 }
 
 button:hover {
   color: #FFF;
   background: #0079bf;
-  box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
-                     0    2px 0   #003f66,
-                     0    1px 3px rgba(0, 0, 0, .5);
+  -webkit-box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #003f66,
+                             0    1px 3px rgba(0, 0, 0, .5);
+          box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #003f66,
+                             0    1px 3px rgba(0, 0, 0, .5);
 }
 
 button:active {
  top: 2px;
  text-shadow: 0 -1px 0 rgba(0, 0, 0, .4);
- box-shadow: inset -1px -1px  0       rgba(255, 255, 255, .15),
-             inset   0   0    0px 1px #004f80,
-                     0   0px  0px     rgba(0, 0, 0, .7);
+ -webkit-box-shadow: inset -1px -1px  0       rgba(255, 255, 255, .15),
+                     inset   0   0    0px 1px #004f80,
+                             0   0px  0px     rgba(0, 0, 0, .7);
+         box-shadow: inset -1px -1px  0       rgba(255, 255, 255, .15),
+                     inset   0   0    0px 1px #004f80,
+                             0   0px  0px     rgba(0, 0, 0, .7);
+}
+
+textarea {
+  border: solid 1px #28414F;
+  background-color: #cfdde5;
 }
 
 
@@ -163,23 +180,45 @@ button:active {
 }
 
 #program-input, #program-progress {
-  border: solid 1px #666;
+  border: solid 1px #4e7e99;
+  background-color: #E6F6FF;
   width: 400px;
   min-height: 300px;
-  background-color: #FFF;
-  color: #000;
-  font-family: 'Consolas', 'monaco', monospace;
-  font-size: 16px;
+  color: #00304d;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, .2);
+  font-family: 'Ubuntu Mono', 'Consolas', 'monaco', monospace;
+  font-size: 18px;
   padding: 5px;
-  line-height: 1.4;
+  line-height: 1.3;
+  outline: none;
+  -webkit-box-shadow: inset 0 -1px 0 rgba(128, 208, 255, 0.4);
+          box-shadow: inset 0 -1px 0 rgba(128, 208, 255, 0.4);
+}
+
+#program-input:focus {
+  border-color: #345466;
+  outline: solid 1px #4e7e99;
+  -webkit-box-shadow: inset 0 2px 3px rgba(0, 0, 0, .3);
+          box-shadow: inset 0 2px 3px rgba(0, 0, 0, .3);
 }
 
 #program-progress {
   display: none;
 }
 
+#program-progress .line {
+  padding: 0 10px;
+  -webkit-transition: background 50ms linear;
+     -moz-transition: background 50ms linear;
+      -ms-transition: background 50ms linear;
+       -o-transition: background 50ms linear;
+          transition: background 50ms linear;
+}
+
 #program-progress .line.active {
-  background-color: #CCC;
+  background-color: #00649F;
+  color: #E6F6FF;
+  box-shadow: inset 5px 0 0 #80D0FF;
 }
 
 #reference {
@@ -191,15 +230,18 @@ section {
   padding: 20px;
   border: solid 1px #98a9b3;
   border-width: 0 0 1px 0;
-  box-shadow: 1px 1px 2px  rgba(0, 0, 0, .2);
+  -webkit-box-shadow: 1px 1px 2px  rgba(0, 0, 0, .2);
+          box-shadow: 1px 1px 2px  rgba(0, 0, 0, .2);
 }
 
 section header {
   color: #FFF;
   margin: -20px -20px 20px -20px;
   overflow: hidden;
-  box-shadow: inset -1px -1px 0 rgba(128, 208, 255, 0.4),
+  -webkit-box-shadow: inset -1px -1px 0 rgba(128, 208, 255, 0.4),
               0 0 5px rgba(0, 0, 0, .4);
+          box-shadow: inset -1px -1px 0 rgba(128, 208, 255, 0.4),
+                      0 0 5px rgba(0, 0, 0, .4);
 }
 
 section header h1 {
@@ -232,9 +274,10 @@ section li {
 #reference code, #reference pre {
   background-color: #FFF;
   border: solid 1px #D0D0D0;
-  border-radius: 4px;
   padding: 3px;
   color: #444;
+  -webkit-border-radius: 4px;
+          border-radius: 4px;
 }
 
 #reference pre {
@@ -244,7 +287,8 @@ section li {
 #reference pre code {
   background: none;
   border: none;
-  border-radius: 0;
   padding: 0;
+  -webkit-border-radius: 0;
+          border-radius: 0;
 }
 
