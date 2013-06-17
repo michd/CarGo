@@ -15,6 +15,40 @@
     grids = {},
     events = App.eventDispatcher;
 
+  grids.simple = {
+    width: 7,
+    height: 3,
+    startPos: [1, 1],
+    startDirection: 'r',
+
+    goalPos: [5, 1],
+
+    content: [
+      {type: 'wall', rect: [[0, 0], [7, 1]]},
+      {type: 'wall', rect: [[0, 2], [7, 1]]},
+      {type: 'wall', pos: [0, 1]},
+      {type: 'wall', pos: [6, 1]}
+    ]
+  };
+
+  grids.turn = {
+    width: 7,
+    height: 7,
+    startPos: [1, 1],
+    startDirection: 'r',
+
+    goalPos: [1, 3],
+    content: [
+      {type: 'wall', rect: [[0, 0], [7, 1]]},
+      {type: 'wall', rect: [[0, 6], [7, 1]]},
+      {type: 'wall', rect: [[0, 1], [1, 5]]},
+      {type: 'wall', rect: [[6, 1], [1, 5]]},
+      {type: 'wall', rect: [[2, 2], [3, 3]]},
+      {type: 'wall', pos: [1, 2]}
+    ]
+  };
+
+
   grids.zigzag = {
     width: 15,
     height: 15,
@@ -43,10 +77,13 @@
     ]
   };
 
+  // Make available to the App namespace
+  App.grids = grids;
+
 
 
   // Initialize the game grid
-  App.Grid(grids.zigzag);
+  App.Grid(grids.simple);
 
   // Help debugging
   App.eventDispatcher.enableLogging();

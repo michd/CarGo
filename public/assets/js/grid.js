@@ -67,18 +67,24 @@
     }
 
 
-    this.getCell = getCell;
+    /**
+     * Empties the grid, both UI-wise as internal data-wise
+     *
+     */
+    function clear() {
+      data = [];
+      $grid.find('.row').remove();
+    }
 
 
     /**
-     * Initialized the game grid with game data
+     * Initializes the game grid with game data
      *
      * Important: also initializes App.Car
      *
      * @param  {Object} gameData
-     * @return {App.Grid} self
      */
-    this.init = function (gameData) {
+    function initialize(gameData) {
       var
         x, y,
         i,
@@ -128,33 +134,47 @@
       finish.toggleFlag('finish', true);
 
       // Position car
-      App.Car(getCell(gameData.startPos), gameData.startDirection, self);
+      if (App.car) {
+        App.car.place(self.getCell(gameData.startPos), gameData.startDirection);
+      } else {
+        App.Car(getCell(gameData.startPos), gameData.startDirection, self);
+      }
 
       // Broadcast how many credits were placed
-      events.trigger('grid.credits-placed', contentCounters.credit);
-
-      return self;
-    };
+      events.trigger('grid.credits-placed', contentCounters.credit || 0);
+    }
 
 
     /**
-     * Restores the original state of the grid (as defined in gameData)
+     * Empties grid and reinitializes it with data in gameData
      *
-     * @return {App.Grid} self
      */
-    this.reset = function () {
-      data = [];
-      $grid.find('.row').remove();
-      self.init(gameData);
-      App.car.place(self.getCell(gameData.startPos), gameData.startDirection);
+    function reset() {
+      clear();
+      initialize(gameData);
+    }
 
-      return self;
-    };
+
+    /**
+     * Load new grid data and reinitialize grid with newly selected data
+     * @param  {String} gridName
+     */
+    function selectGrid(gridName) {
+      if (App.grids[gridName] !== undefined) {
+        gameData = App.grids[gridName];
+      }
+      reset();
+    }
+
+
+    this.getCell = getCell;
+
 
     // Listen for events
     events.subscribe({
-      'ui.reset':      self.reset,
-      'program.reset': self.reset
+      'ui.select.grid': selectGrid,
+      'ui.reset':      reset,
+      'program.reset': reset
     });
 
     App.grid = self;
@@ -167,7 +187,7 @@
       return self;
     };
 
-    this.init(gameData);
+    initialize(gameData);
   };
 
 }(this.CARGO, this.jQuery, this));

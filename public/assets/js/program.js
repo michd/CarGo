@@ -203,6 +203,8 @@
         // Iterator
         i = 0;
 
+      lineCount = 0;
+
 
       /**
        * Recursively parse a block of isntructions

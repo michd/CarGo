@@ -30,6 +30,16 @@
         </div>
       </header>
 
+      <div id="grid-picker">
+        <label for="grid-selector">Choose maze</label>
+        <select id="grid-selector" name="grid" data-event="">
+          <option value="simple" selected>Simple</option>
+          <option value="turn">Turn</option>
+          <option value="zigzag">Zigzag</option>
+        </select>
+        <button data-event="select.grid" data-value-from="grid-selector">Select</button>
+      </div>
+
       <div id="grid"></div>
     </section>
 
