@@ -28,21 +28,22 @@
 
 
     /**
-     * Fills in cells in a rectangle, for easily populating and area
+     * Fills in cells in a rectangle, for easily populating an area
      *
-     * @param  {Array} coords Endpoints of rectangle ([[x1, y1], [x2, y2]])
-     * @param  {String} type  What to fill this rectangle with
+     * @param  {Array}  coords Origin and dimensions of rect ([[x, y], [w, h]])
+     * @param  {String} type   What to fill this rectangle with
      */
     function drawRect(coords, type) {
       var
         x, y,
         cell,
-        xDir = coords[0][0] <= coords[1][0] ? 1 : -1,
-        yDir = coords[0][1] <= coords[1][1] ? 1 : -1;
+        originX = coords[0][0],
+        originY = coords[0][1],
+        width   = coords[1][0],
+        height  = coords[1][1];
 
-      // TODO: fix loop condition so it actually works with both directions
-      for (x = coords[0][0]; x <= coords[1][0]; x += xDir) {
-        for (y = coords[0][1]; y <= coords[1][1]; y += yDir) {
+      for (x = originX; x < originX + width; x += 1) {
+        for (y = originY; y < originY + height; y += 1) {
           cell = data[y][x];
           cell.toggleFlag(type, true);
         }
