@@ -109,4 +109,6 @@
     }
   });
 
+  $('select').chosen();
+
 }(this.CARGO, this.jQuery, this));

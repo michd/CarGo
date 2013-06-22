@@ -50,6 +50,17 @@ header h1, header h2, header h3 {
   line-height: 1;
 }
 
+button, .chzn-container-single a {
+  -webkit-border-radius: 2px 2px 0 0;
+          border-radius: 2px 2px 0 0;
+  -webkit-box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #00304D,
+                             0    1px 3px rgba(0, 0, 0, .4);
+          box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
+                             0    2px 0   #00304D,
+                             0    1px 3px rgba(0, 0, 0, .4);
+}
+
 button {
   position: relative;
   font-family: "Jockey One", sans-serif;
@@ -62,17 +73,9 @@ button {
   padding: 2px 8px;
   margin-right: 5px;
   cursor: pointer;
-  -webkit-border-radius: 2px 2px 0 0;
-          border-radius: 2px 2px 0 0;
-  -webkit-box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
-                             0    2px 0   #00304D,
-                             0    1px 3px rgba(0, 0, 0, .4);
-          box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
-                             0    2px 0   #00304D,
-                             0    1px 3px rgba(0, 0, 0, .4);
 }
 
-button:hover {
+button:hover, .chzn-container-single a:hover {
   color: #FFF;
   background: #0079bf;
   -webkit-box-shadow: inset -1px -1px 0   rgba(255, 255, 255, .15),
@@ -149,7 +152,68 @@ textarea {
 
 #grid-selector { /* todo: prettify dropdowns with jquery selectbox */
   height: 30px;
+  line-height: 30px;
+  min-width: 80px;
 }
+
+.chzn-container-single a, .chzn-drop {
+  background: #00649F;
+}
+
+.chzn-container {
+  height: 30px;
+  font-weight: bold;
+  border-radius: 2px 2px 0 0;
+  margin-top: -1px;
+}
+
+.chzn-container-single a {
+  height: 28px;
+  line-height: 27px;
+  padding: 0 8px;
+  color: #FFF;
+}
+
+.chzn-container-single a b {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border: solid 7px transparent;
+  border-width: 7px 4px;
+  border-top-color: #FFF;
+  position: relative;
+  top: 6px;
+}
+
+.chzn-container-single.chzn-with-drop a b {
+  border-bottom-color: #FFF;
+  border-top-color: transparent;
+  top: -1px;
+}
+
+.chzn-drop {
+  color: #E6F6FF;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+}
+
+.chzn-results {
+  padding: 0;
+  margin: 0;
+}
+
+.chzn-results li {
+  padding: 5px 6px;
+}
+
+.chzn-results .highlighted {
+  background-color: #00304D;
+  color: #FFF;
+}
+
+.chzn-search { display: none; }
+
+
 
 #game-area, #program, #reference {
   margin: 20px 0 0 20px;
