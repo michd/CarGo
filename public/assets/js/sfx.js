@@ -115,7 +115,7 @@
 
   // Tie samples to events
   events.subscribe({
-    'program.initialized': function () {
+    'parser.program-parsed': function () {
       play('start');
     },
 

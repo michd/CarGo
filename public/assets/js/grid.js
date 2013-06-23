@@ -172,9 +172,9 @@
 
     // Listen for events
     events.subscribe({
-      'ui.select.grid': selectGrid,
-      'ui.reset':      reset,
-      'program.reset': reset
+      'ui.select.grid':        selectGrid,
+      'ui.reset':              reset,
+      'parser.program-parsed': reset
     });
 
     App.grid = self;

@@ -209,14 +209,14 @@
 
 
     events.subscribe({
-      'ui.run':              resume,
-      'ui.pause':            pause,
-      'ui.step':             step,
-      'ui.reset':            clear,
-      'program.initialized': clear,
-      'ui.speed.faster':     faster,
-      'ui.speed.reset':      resetSpeed,
-      'ui.speed.slower':     slower
+      'ui.run':                resume,
+      'ui.pause':              pause,
+      'ui.step':               step,
+      'ui.reset':              clear,
+      'parser.program-parsed': clear,
+      'ui.speed.faster':       faster,
+      'ui.speed.reset':        resetSpeed,
+      'ui.speed.slower':       slower
     });
 
     App.queue = self;

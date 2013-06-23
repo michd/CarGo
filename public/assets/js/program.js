@@ -72,11 +72,6 @@
       program          = [],
       car              = App.car, // The car is what the program is centered on.
       queue            = App.queue,
-      ProgramException = App.ProgramException,
-      lineCount        = 0,
-
-      codeEdited       = true,
-      unparsedCode     = '',
 
       self             = this;
 
@@ -87,184 +82,6 @@
     }
 
 
-    /**
-     * Parses a single text line of instruction from the program into
-     * and object that's easier to work with.
-     *
-     * Uses Regexes based on constants to parse each command and command type
-     *
-     * @param  {String} instruction Plaintext instruction
-     * @throws {ProgramException} If instruction matches no instruction type
-     * @return {Object} Command object, possibly unfinished if block starter
-     */
-    function parseInstruction(instruction) {
-
-      var
-        // Consts for indicating instruction types
-        SIMPLE            = 'simple',
-        CONDITIONAL       = 'conditional',
-        CONDITIONAL_BLOCK = 'conditionalBlock',
-        BLOCK_ENDER       = 'blockEnder',
-
-        // Regexes of instruction line types
-        instructionTypes = {
-          simple:           new RegExp('^(' + instructions.join('|') + ')$'),
-          conditional:      new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '): (' + instructions.join('|') + ')$'),
-          conditionalBlock: new RegExp('^(' + conditionalStructures.join('|') + ') (' + conditions.join('|') + '):$'),
-          blockEnder:       new RegExp('^' + END + '$')
-        },
-
-        instructionType,
-        matches,
-        i,
-
-        // Object to contain the parsed command
-        output = {};
-
-
-      // Trim leading and trailing whitespace, convert to uppercase
-      instruction = instruction.replace(/^\s\s*/, '').replace(/\s\s*$/, '').toUpperCase();
-
-      // Find matching instruction type
-      for (instructionType in instructionTypes) {
-        if (instructionTypes.hasOwnProperty(instructionType)) {
-          matches = instruction.match(instructionTypes[instructionType]);
-
-          if (matches) { break; }
-        }
-      }
-
-      if (!matches) { // No matches found means we failed to parse
-        throw new ProgramException(
-          'Failed to parse instruction: "' + instruction + '"',
-          instruction
-        );
-      }
-
-      output.plainText = instruction; // For use in showing program progress
-
-      // Build output command objected based on what pattern matched
-      switch (instructionType) {
-
-      case SIMPLE:
-        output.instruction = matches[1];
-        break;
-
-      case CONDITIONAL:
-        output.instruction = matches[3];
-        break;
-
-      case CONDITIONAL_BLOCK:
-        output.instructions = [];
-        break;
-
-      case BLOCK_ENDER:
-        output.control = END;
-        break;
-      }
-
-      if ([CONDITIONAL, CONDITIONAL_BLOCK].indexOf(instructionType) > -1) {
-        output.control   = matches[1];
-        output.condition = matches[2];
-      }
-
-      return output;
-    }
-
-
-    /**
-     * Parses the whole plaintext program into a listing we can work with.
-     *
-     * Recursion ahead!
-     *
-     * Ensures commands that are blocks have their own instructions listings
-     * as an array property.
-     *
-     * Output looks somewhat like this (arbitrary program):
-     *  [
-     *    {"control": "UNLESS", "condition": "WALL AHEAD", "instruction": "DRIVE"},
-     *    {"control": "UNTIL", "condition": "ON FINISH", "instructions": [
-     *        {"control": "IF", "condition": "ON CREDIT", "instruction": "PICK UP CREDIT"},
-     *        {"control": "IF", "condition": "WALL AHEAD", "instruction": "TURN RIGHT"},
-     *        {"control": "UNLESS", "condition": "WALL AHEAD", "instruction": "DRIVE"}
-     *      ]
-     *    }
-     *  ]
-     *
-     * @param  {String} textInput newline separated instructions
-     * @return {Array} program listing
-     */
-    function parseProgram(textInput) {
-
-      var
-        // Split program into lines after trimming whitespace
-        programLines = textInput.replace(/^\s\s*/, '').replace(/\s\s*$/, '').split(/\n|\r/),
-
-        // Iterator
-        i = 0;
-
-      lineCount = 0;
-
-
-      /**
-       * Recursively parse a block of isntructions
-       *
-       * Iterates over the list of program lines and adds commands to the block
-       * array, figures out when the block ends.
-       *
-       * When a new block opener is encountered, uses recursion
-       *
-       * @return {Object} command
-       */
-      function parseBlock() {
-
-        var
-          // Begin with an empty list of instructions
-          block = [],
-
-          // Store one line of parsed instruction
-          parsed = false,
-
-          // Store whether we've reached the end of the block
-          end = false;
-
-        while (!end) {
-          // Parse an instruction and advance the pointer
-          parsed = parseInstruction(programLines[i]);
-          i += 1;
-
-          parsed.lineNumber = lineCount += 1;
-
-          if (parsed.instructions) {
-            // Starts a new block of instructions
-            // Note the plural.
-
-            // Use recursion to fetch the block of instructions
-            // for the one we just parsed.
-            parsed.instructions = parseBlock();
-          }
-
-          if (parsed.control !== END) {
-            // If the parsed instruction is not the end instruction,
-            // add it to the list for this block
-            block.push(parsed);
-          }
-
-          // Both the END instruction and reaching the last line indicate block
-          // end.
-          end = (parsed.control === END || i >= programLines.length);
-        }
-
-        return block;
-      }
-
-
-      if (programLines.length < 2 && programLines[0] === '') {
-        return [];
-      }
-
-      return parseBlock();
-    }
 
 
     /**
@@ -388,70 +205,21 @@
      *
      */
     function run() {
+      if (program.length === 0) { return; }
       if (queue.isEmpty()) {
         queue.push(wrapCommand(program, execute));
       }
-    }
-
-
-    /**
-     * Parses raw program code, intializing the program for run
-     *
-     * @param {String} programText Unparsed program code
-     * @triggers {program.initialized}
-     * @triggers {program.empty} If [program.length === 0]
-     */
-    function initialize(programText) {
-      program = parseProgram(programText);
-      events.trigger('program.initialized', [program]);
-
-      if (program.length === 0) {
-        events.trigger('program.empty');
-      }
-    }
-
-
-    /**
-     * Starts running programming, optionally parsing new code first
-     *
-     * @triggers {error.program} if App.ProgramException caught
-     * @triggers {program.run}
-     * @triggers {program.reset} if codeEdited
-     */
-    function startProgram() {
-
-      if (codeEdited) {
-        try {
-          initialize(unparsedCode);
-          codeEdited = unparsedCode === '';
-          events.trigger('program.reset');
-        } catch (e) {
-
-          program = [];
-
-          if (e instanceof App.ProgramException) {
-            events.trigger('error.program', e);
-          } else { // Ewww
-            throw e;
-          }
-        }
-      }
-
       events.trigger('program.run', [program]);
-      run();
     }
 
 
     // Set up event listeners
     events.subscribe({
-      'ui.run': startProgram,
-      'ui.step': startProgram,
-
-      // Code editor content changed
-      'ui.code.edited': function (data) {
-        unparsedCode = data;
-        codeEdited = true;
-      }
+      'parser.program-parsed': function (newProgram) {
+        program = newProgram;
+      },
+      'ui.run':  run,
+      'ui.step': run
     });
 
 

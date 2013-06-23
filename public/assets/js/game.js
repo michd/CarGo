@@ -107,11 +107,11 @@
 
     // Map events to functions
     events.subscribe({
-      'program.executing':   commandExecuted,
-      'credit-picked-up':    creditPickedUp,
-      'grid.credits-placed': setGameCredits,
-      'ui.reset':            reset,
-      'program.reset':       reset
+      'program.executing':     commandExecuted,
+      'credit-picked-up':      creditPickedUp,
+      'grid.credits-placed':   setGameCredits,
+      'ui.reset':              reset,
+      'parser.program-parsed': reset
     });
 
 

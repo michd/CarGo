@@ -20,7 +20,7 @@
 
   events.subscribe({
     // Program failed to parse
-    'error.program': function (error) {
+    'error.parser': function (error) {
       notify.error(
         'Error: Failed to parse the following instruction: <pre><code>' + htmlEntities(error.instruction) + '</code></pre>',
         'program'
@@ -28,7 +28,7 @@
     },
 
     // Tried to run program before adding code
-    'program.empty': function () {
+    'parser.program-empty': function () {
       notify.warning('You have to write a program before the Run button will do anything!', 'program');
     },
 
@@ -40,6 +40,15 @@
     // Clicked run button, clear program-related notifications
     'ui.run': function () {
       notify.clear('program');
+    },
+
+    'ui.step': function () {
+      notify.clear('program');
+    },
+
+    'ui.reset': function () {
+      notify.clear('program');
     }
+
   });
 }(this.CARGO, this.jQuery));
