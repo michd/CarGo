@@ -3,19 +3,12 @@
   var
     events = App.eventDispatcher,
 
-    $commandsExecuted = $('#commands-executed'),
+    $score = $('#score'),
     $creditsCollected = $('#credits-collected');
 
-
-  /**
-   * Updates the commands executed display
-   *
-   * @param  {Number|String} count
-   */
-  function updateCommandsExecuted(count) {
-    $commandsExecuted.text(count);
+  function updateScore(points) {
+    $score.text(points);
   }
-
 
   /**
    * Updates the credits collected / available display
@@ -29,7 +22,7 @@
   }
 
   events.subscribe({
-    'game.command-execute-update': updateCommandsExecuted,
+    'game.score-update': updateScore,
     'game.credits-update':         updateCredits
   });
 

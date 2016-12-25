@@ -30,6 +30,8 @@
       creditsPickedUp = 0,
       creditsInGame   = 0,
       commandExecutes = 0,
+      commandsInProgram = 0,
+      score = 0,
       self            = this;
 
     // Ensure instantiation
@@ -47,6 +49,7 @@
       commandExecutes += 1;
 
       events.trigger('game.command-execute-update', commandExecutes);
+      calculateScore();
     }
 
 
@@ -74,8 +77,20 @@
       if (creditsPickedUp === creditsInGame) {
         events.trigger('game.got-all-credits', creditsPickedUp);
       }
+
+      calculateScore();
     }
 
+    function calculateScore() {
+      score = (creditsInGame - creditsPickedUp) * 10 + commandExecutes + commandsInProgram * 2;
+      events.trigger('game.score-update', score);
+      // Get as low a score as possible.
+      // More commands executed = increases score
+      // Not getting credits = increases score
+      // Number of lines increases score
+      //
+      // score = (total credits - credits picked up) * 10 + commands executed + commands in program
+    }
 
     /**
      * Resets the counters to zero
@@ -86,11 +101,18 @@
     function reset() {
       commandExecutes = 0;
       creditsPickedUp = 0;
+      score = 0;
 
       events.trigger('game.command-execute-update', commandExecutes);
       events.trigger('game.credits-update', [creditsPickedUp, creditsInGame]);
+      events.trigger('game.score-update', score);
     }
 
+    function onProgramParsed(program, numCommands) {
+      console.log("### onProgramParsed with numCommands:", numCommands);
+      commandsInProgram = numCommands;
+      reset();
+    }
 
     /**
      * Set up how many credits there are to be picked up in the grid
@@ -111,7 +133,7 @@
       'credit-picked-up':      creditPickedUp,
       'grid.credits-placed':   setGameCredits,
       'ui.reset':              reset,
-      'parser.program-parsed': reset
+      'parser.program-parsed': onProgramParsed
     });
 
 
@@ -124,7 +146,6 @@
       App.game = self;
       return self;
     };
-
   };
 
   App.game = new App.Game();

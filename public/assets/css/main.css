@@ -10,7 +10,7 @@
 
 html, body {
   background: #E6F6FF;
-  background-image: url(/assets/img/bg.png);
+  background-image: url(../img/bg.png);
   background-repeat: repeat;
 }
 

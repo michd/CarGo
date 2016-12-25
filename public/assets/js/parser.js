@@ -141,6 +141,9 @@
       lastUnparsedLines = [],
       parsedProgram     = [],
 
+      // Counts the number of commands/condition checks while parsing
+      numCommands = 0,
+
       // Self-reference (comment referencing the self-reference of code, while referring to itself in parentheses)
       self              = this;
 
@@ -208,15 +211,18 @@
 
       case SIMPLE:
         output.instruction = matches[1];
+        numCommands++;
         break;
 
       case CONDITIONAL:
         output.instruction = matches[3];
+        numCommands += 2;
         break;
 
 
       case CONDITIONAL_BLOCK:
         output.instructions = [];
+        numCommands += 1;
         break;
 
       case BLOCK_ENDER:
@@ -283,6 +289,7 @@
       edited = true;
       lastUnparsedLines = [];
       parsedProgram = [];
+      numCommands = 0;
     }
 
 
@@ -312,6 +319,8 @@
         }
         return parsedProgram;
       }
+
+      numCommands = 0;
 
 
       /**
@@ -374,7 +383,6 @@
 
       try {
         parsedProgram = parseBlock();
-
       } catch (e) {
 
         if (e.constructor === ParserException) {
@@ -388,11 +396,12 @@
 
       edited = false;
 
-      events.trigger('parser.program-parsed', [parsedProgram]);
+      events.trigger('parser.program-parsed', [parsedProgram, numCommands]);
 
       if (parsedProgram.length === 0) {
         events.trigger('parser.program-empty');
       }
+
       return parsedProgram;
     }
 

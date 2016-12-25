@@ -22,14 +22,14 @@
   width: 40px;
   min-height: 40px;
   max-height: 40px;
-  background-image: url(/assets/img/grid-sprites.png);
+  background-image: url(../img/grid-sprites.png);
   background-repeat: no-repeat;
   background-position: 0 40px;
   padding: 0;
 }
 
 .cell:before, .cell:after {
-  background-image: url(/assets/img/grid-sprites.png);
+  background-image: url(../img/grid-sprites.png);
   background-repeat: no-repeat;
 }
 
